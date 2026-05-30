@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  SPACY_MODEL: pt_core_news_sm
-
 jobs:
   unit-tests:
     name: Unit Tests
@@ -47,12 +44,8 @@ jobs:
             "pyyaml>=6.0" \
             "jinja2>=3.1" \
             "weasyprint>=62.0" \
-            "spacy>=3.7" \
             "langdetect>=1.0.9" \
             pytest
-
-      - name: Download spaCy model
-        run: python -m spacy download ${{ env.SPACY_MODEL }}
 
       - name: Run pytest
         run: |
