@@ -204,6 +204,60 @@ Quando o repositório estiver no GitHub, ativa o Pages em **Settings → Pages �
 
 ---
 
+## GitHub Actions — Scans Automáticos
+
+O repositório tem dois workflows em `.github/workflows/`:
+
+---
+
+### CI — Testes automáticos (`ci.yml`)
+
+Corre automaticamente em cada **push** ou **pull request** para `main`. Não requer configuração.
+
+```
+push para main  →  GitHub Actions corre pytest automaticamente
+```
+
+---
+
+### GDPR Scan — Análise on-demand (`scan.yml`)
+
+Corre manualmente quando quiseres. Analisa um ou mais sites e atualiza o dashboard.
+
+**Passo a passo:**
+
+1. Vai ao repositório no GitHub
+2. Clica no separador **Actions**
+3. No menu lateral, clica em **GDPR Scan (On Demand)**
+4. Clica no botão **Run workflow**
+5. Preenche os campos:
+
+| Campo | Descrição | Exemplo |
+|---|---|---|
+| `sites` | Site(s) predefinidos | `all`, `sapo`, `publico`, `rtp` |
+| `custom_url` | URL personalizado (opcional) | `https://dn.pt` |
+| `custom_label` | Label para o URL personalizado | `dn_pt` |
+| `commit_results` | Guardar no repo e atualizar dashboard | `true` |
+
+6. Clica em **Run workflow** (botão verde)
+
+O workflow corre o scraper, gera o relatório e — se `commit_results` estiver ativo — faz commit dos resultados para `docs/data/`, atualizando o dashboard automaticamente.
+
+**Exemplo — analisar todos os sites predefinidos:**
+- `sites` → `all`
+- `custom_url` → *(vazio)*
+- `commit_results` → `true`
+
+**Exemplo — analisar um site novo sem alterar código:**
+- `sites` → `none`
+- `custom_url` → `https://dn.pt`
+- `custom_label` → `dn_pt`
+- `commit_results` → `true`
+
+> Após o workflow terminar, adiciona `dn_pt.json` ao `docs/data/manifest.json` para o dashboard o mostrar.
+
+---
+
 ## Regras RGPD
 
 As regras estão definidas em `rules/gdpr_rules.yaml` e podem ser editadas ou estendidas sem alterar código.

@@ -114,10 +114,10 @@ jobs:
           LABEL="${{ matrix.label }}"
           URL="${{ matrix.url }}"
           DATE="$(date -u +%Y-%m-%d)"
-          python -m src.cli "${URL}" \
+          python -m src.cli analyze "${URL}" \
             --output "scan-results/${LABEL}_${DATE}.json" \
             --html   "scan-results/${LABEL}_${DATE}.html" \
-            --quiet  || true
+            --quiet --no-history || true
           echo "date=${DATE}" >> "$GITHUB_OUTPUT"
 
       - name: Atualizar historico em docs/data
