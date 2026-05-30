@@ -6,6 +6,10 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: Arial, sans-serif; font-size: 14px; color: #222; margin: 2em; line-height: 1.5; }
+
+        /* PDF — WeasyPrint: A4 landscape para a tabela caber */
+        @page { size: A4 landscape; margin: 1.5cm; }
+        td, th { word-break: break-word; overflow-wrap: break-word; }
         h1 { font-size: 1.6em; color: #2c3e50; margin-bottom: 0.2em; }
         h2 { font-size: 1.2em; color: #2c3e50; margin: 1.4em 0 0.6em; border-bottom: 1px solid #ddd; padding-bottom: 0.3em; }
         .meta { color: #666; font-size: 0.9em; margin-bottom: 1em; }
