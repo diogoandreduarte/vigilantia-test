@@ -67,6 +67,8 @@ jobs:
     name: Scan ${{ matrix.label }}
     runs-on: ubuntu-latest
     needs: resolve-matrix
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.resolve-matrix.outputs.matrix) }}
