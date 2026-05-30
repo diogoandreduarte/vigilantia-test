@@ -1,0 +1,12 @@
+pyyaml
+jinja2
+weasyprint
+
+playwright
+beautifulsoup4
+
+# NOTAS DE DEPENDÊNCIAS MANUAIS
+# - Após instalar o pacote 'playwright', execute:
+#     python -m playwright install
+#   para baixar os browsers necessários.
+# - Se instalar pacotes manualmente, lembre-se de adicionar aqui e documentar comandos extra.

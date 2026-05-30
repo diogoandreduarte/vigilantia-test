@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vigilantia — Dashboard RGPD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#0d1117; --surface:#161b22; --surface2:#1c2128; --border:#30363d;
+      --text:#c9d1d9; --text-dim:#8b949e; --text-head:#f0f6fc;
+      --green:#2ea043; --green-bg:#0d2918; --green-text:#56d364;
+      --red:#da3633; --red-bg:#2d1117; --red-text:#f85149;
+      --yellow:#e3b341; --yellow-bg:#2d1f00; --yellow-text:#e3b341;
+      --blue:#388bfd; --blue-bg:#0c1d3d; --blue-text:#79c0ff;
+      --purple-text:#d2a8ff; --purple-bg:#1d1232;
+      --orange-text:#ffa657; --orange-bg:#2d1a00;
+      --teal-text:#76e3ea; --teal-bg:#002d32;
+      --accent:#388bfd; --radius:8px; --radius-sm:4px; --shadow:0 1px 3px rgba(0,0,0,.4);
+    }
+    html { font-size: 15px; }
+    body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.6; }
+
+    header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; }
+    .logo { display:flex; align-items:center; gap:.6rem; font-size:1.1rem; font-weight:700; color:var(--text-head); text-decoration:none; cursor:pointer; }
+    .logo-icon { width:28px; height:28px; background:linear-gradient(135deg,#388bfd 0%,#a371f7 100%); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:.9rem; }
+    .header-meta { font-size:.78rem; color:var(--text-dim); }
+
+    main { max-width:1100px; margin:0 auto; padding:2rem 1.5rem 4rem; }
+
+    #page-summary, #page-history, #page-detail { display:none; }
+    #page-summary { display:block; }
+
+    .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.1rem 1.3rem; }
+    .stat-label { font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--text-dim); margin-bottom:.35rem; }
+    .stat-value { font-size:1.8rem; font-weight:700; color:var(--text-head); line-height:1; }
+    .stat-value.green { color:var(--green-text); }
+    .stat-value.red   { color:var(--red-text); }
+
+    .section-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+    .section-heading h2 { font-size:1rem; font-weight:600; color:var(--text-head); }
+    .section-heading small { font-size:.75rem; color:var(--text-dim); }
+
+    .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+    table { width:100%; border-collapse:collapse; font-size:.88rem; }
+    thead tr { background:var(--surface2); border-bottom:1px solid var(--border); }
+    th { padding:.7rem 1rem; text-align:left; font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--text-dim); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none; }
+    th:hover { color:var(--text); }
+    th .sort-arrow { margin-left:.25rem; opacity:.4; }
+    th.sorted .sort-arrow { opacity:1; color:var(--accent); }
+    tbody tr { border-bottom:1px solid var(--border); transition:background .1s; cursor:pointer; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:var(--surface2); }
+    td { padding:.75rem 1rem; vertical-align:middle; }
+
+    .site-name { font-weight:600; color:var(--text-head); }
+    .site-url  { font-size:.75rem; color:var(--text-dim); margin-top:.15rem; }
+
+    .progress-wrap { display:flex; align-items:center; gap:.6rem; }
+    .progress-bar  { flex:1; height:6px; background:var(--border); border-radius:99px; min-width:80px; overflow:hidden; }
+    .progress-fill { height:100%; border-radius:99px; background:var(--green); transition:width .4s ease; }
+    .progress-label { font-size:.8rem; font-family:'JetBrains Mono',monospace; white-space:nowrap; color:var(--text-dim); }
+
+    .badge { display:inline-block; padding:.18em .55em; border-radius:var(--radius-sm); font-size:.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; white-space:nowrap; }
+    .badge-high   { background:var(--red-bg);    color:var(--red-text);    border:1px solid #5a1e1e; }
+    .badge-medium { background:var(--yellow-bg); color:var(--yellow-text); border:1px solid #4a3900; }
+    .badge-low    { background:var(--blue-bg);   color:var(--blue-text);   border:1px solid #0c2a5e; }
+    .badge-none   { background:var(--green-bg);  color:var(--green-text);  border:1px solid #0d3a1f; }
+
+    .cat-badge { display:inline-block; padding:.15em .5em; border-radius:var(--radius-sm); font-size:.7rem; font-weight:500; white-space:nowrap; }
+    .cat-consentimento { background:var(--red-bg);    color:var(--red-text);    border:1px solid #5a1e1e; }
+    .cat-cookies       { background:var(--yellow-bg); color:var(--yellow-text); border:1px solid #4a3900; }
+    .cat-terceiros     { background:var(--orange-bg); color:var(--orange-text); border:1px solid #4a2a00; }
+    .cat-formularios   { background:var(--teal-bg);   color:var(--teal-text);   border:1px solid #004a50; }
+    .cat-politica      { background:var(--purple-bg); color:var(--purple-text); border:1px solid #3a1a6e; }
+    .cat-default       { background:var(--surface2);  color:var(--text-dim);    border:1px solid var(--border); }
+
+    .date-chip { font-family:'JetBrains Mono',monospace; font-size:.75rem; color:var(--text-dim); }
+
+    .trend { font-size:1rem; font-weight:700; }
+    .trend-up   { color:var(--green-text); }
+    .trend-down { color:var(--red-text); }
+    .trend-flat { color:var(--text-dim); }
+
+    .back-btn { display:inline-flex; align-items:center; gap:.4rem; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:.4rem .9rem; border-radius:var(--radius-sm); font-size:.83rem; cursor:pointer; margin-bottom:1.5rem; transition:background .15s,border-color .15s; }
+    .back-btn:hover { background:var(--surface2); border-color:var(--text-dim); }
+
+    .page-title { font-size:1.4rem; font-weight:700; color:var(--text-head); margin-bottom:.25rem; }
+    .page-subtitle { font-size:.83rem; color:var(--text-dim); margin-bottom:1.5rem; }
+    .page-subtitle a { color:var(--blue-text); text-decoration:none; }
+    .page-subtitle a:hover { text-decoration:underline; }
+
+    .detail-header { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem; }
+    .detail-title  { font-size:1.4rem; font-weight:700; color:var(--text-head); }
+    .detail-url    { font-size:.83rem; color:var(--text-dim); margin-top:.2rem; }
+    .detail-url a  { color:var(--blue-text); text-decoration:none; }
+    .detail-url a:hover { text-decoration:underline; }
+    .detail-stats  { display:flex; gap:1.5rem; flex-wrap:wrap; }
+    .detail-stat   { text-align:center; }
+    .detail-stat-val   { font-size:1.6rem; font-weight:700; line-height:1; }
+    .detail-stat-label { font-size:.7rem; text-transform:uppercase; letter-spacing:.07em; color:var(--text-dim); margin-top:.2rem; }
+
+    .filter-bar { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1.2rem; align-items:center; }
+    .filter-label { font-size:.75rem; color:var(--text-dim); margin-right:.25rem; }
+    .filter-btn { padding:.3rem .75rem; border-radius:99px; border:1px solid var(--border); background:var(--surface); color:var(--text-dim); font-size:.78rem; cursor:pointer; transition:all .15s; }
+    .filter-btn:hover  { border-color:var(--accent); color:var(--text); }
+    .filter-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+    .findings-grid { display:flex; flex-direction:column; gap:.6rem; }
+    .finding-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1rem 1.2rem; display:flex; gap:1rem; align-items:flex-start; transition:border-color .15s; }
+    .finding-card:hover { border-color:var(--text-dim); }
+    .finding-card.passed        { border-left:3px solid var(--green); }
+    .finding-card.failed-high   { border-left:3px solid var(--red); }
+    .finding-card.failed-medium { border-left:3px solid var(--yellow); }
+    .finding-card.failed-low    { border-left:3px solid var(--blue); }
+    .finding-icon  { font-size:1rem; margin-top:.1rem; flex-shrink:0; }
+    .finding-body  { flex:1; min-width:0; }
+    .finding-top   { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-bottom:.3rem; }
+    .rule-id { font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--text-dim); background:var(--surface2); border:1px solid var(--border); padding:.1em .4em; border-radius:var(--radius-sm); }
+    .finding-title    { font-weight:600; color:var(--text-head); font-size:.93rem; }
+    .finding-desc     { font-size:.82rem; color:var(--text-dim); margin-bottom:.5rem; line-height:1.5; }
+    .finding-evidence { font-family:'JetBrains Mono',monospace; font-size:.73rem; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:.4rem .7rem; color:var(--orange-text); margin-bottom:.5rem; word-break:break-all; }
+    .finding-rec { font-size:.8rem; color:var(--text-dim); display:flex; gap:.4rem; }
+    .finding-rec::before { content:'→'; color:var(--accent); flex-shrink:0; }
+    .finding-article { font-size:.72rem; color:var(--purple-text); margin-top:.35rem; font-style:italic; }
+
+    .empty-state { text-align:center; padding:3rem 1rem; color:var(--text-dim); }
+    .empty-state-icon { font-size:2.5rem; margin-bottom:.5rem; }
+    .spinner { display:inline-block; width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-row td { text-align:center; padding:2.5rem; color:var(--text-dim); }
+
+    @media (max-width:680px) {
+      header { padding:0 1rem; }
+      main   { padding:1.2rem 1rem 3rem; }
+      th, td { padding:.6rem .65rem; }
+      .stats-row { grid-template-columns:1fr 1fr; }
+      .detail-header { flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="logo" id="logo-link">
+    <span class="logo-icon">V</span>
+    Vigilantia
+  </span>
+  <span class="header-meta" id="header-meta">Dashboard RGPD</span>
+</header>
+
+<main>
+
+  <!-- ══ NÍVEL 1 — RESUMO DOS SITES ══ -->
+  <div id="page-summary">
+    <div class="stats-row" id="global-stats">
+      <div class="stat-card"><div class="stat-label">Sites analisados</div><div class="stat-value" id="stat-sites">—</div></div>
+      <div class="stat-card"><div class="stat-label">Regras avaliadas</div><div class="stat-value" id="stat-rules">—</div></div>
+      <div class="stat-card"><div class="stat-label">Regras aprovadas</div><div class="stat-value green" id="stat-passed">—</div></div>
+      <div class="stat-card"><div class="stat-label">Falhas críticas (high)</div><div class="stat-value red" id="stat-high">—</div></div>
+    </div>
+    <div class="section-heading">
+      <h2>Resultados por site</h2>
+      <small id="last-updated"></small>
+    </div>
+    <div class="table-wrap">
+      <table id="summary-table">
+        <thead>
+          <tr>
+            <th data-col="site" class="sorted">Site <span class="sort-arrow">↑</span></th>
+            <th data-col="score">Conformidade <span class="sort-arrow">↕</span></th>
+            <th data-col="severity">Pior severidade <span class="sort-arrow">↕</span></th>
+            <th data-col="failed">Falhas <span class="sort-arrow">↕</span></th>
+            <th>Tendência</th>
+            <th data-col="date">Último scan <span class="sort-arrow">↕</span></th>
+            <th>Histórico</th>
+          </tr>
+        </thead>
+        <tbody id="summary-body">
+          <tr class="loading-row"><td colspan="7"><span class="spinner"></span>&nbsp; A carregar dados…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ NÍVEL 2 — HISTÓRICO DO SITE ══ -->
+  <div id="page-history">
+    <button class="back-btn" id="history-back-btn">&#8592; Todos os sites</button>
+    <div class="page-title" id="history-site-name"></div>
+    <div class="page-subtitle"><a id="history-site-url" href="#" target="_blank" rel="noopener"></a></div>
+    <div class="section-heading">
+      <h2 id="history-count"></h2>
+      <small>Clica numa linha para ver o detalhe</small>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Conformidade</th>
+            <th>Tendência</th>
+            <th>Falhas HIGH</th>
+            <th>Falhas MED</th>
+            <th>Falhas LOW</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ NÍVEL 3 — DETALHE DE UM SCAN ══ -->
+  <div id="page-detail">
+    <button class="back-btn" id="detail-back-btn">&#8592; Histórico</button>
+    <div class="detail-header">
+      <div>
+        <div class="detail-title" id="detail-site-name"></div>
+        <div class="detail-url"><a id="detail-site-url" href="#" target="_blank" rel="noopener"></a></div>
+      </div>
+      <div class="detail-stats" id="detail-stats-row"></div>
+    </div>
+    <div class="filter-bar" id="filter-bar">
+      <span class="filter-label">Filtrar:</span>
+      <button class="filter-btn active" data-filter="all">Todos</button>
+      <button class="filter-btn" data-filter="failed">Falhas</button>
+      <button class="filter-btn" data-filter="passed">Aprovadas</button>
+      <button class="filter-btn" data-filter="high">High</button>
+      <button class="filter-btn" data-filter="medium">Medium</button>
+      <button class="filter-btn" data-filter="low">Low</button>
+    </div>
+    <div class="findings-grid" id="findings-container"></div>
+  </div>
+
+</main>
+
+<script>
+  /* ── Config ──────────────────────────────────────────────────────────── */
+  const MANIFEST_URL = 'data/manifest.json';
+  const SITES_FALLBACK = ['sapo_pt.json'];
+  const SEV_ORDER = { high:3, medium:2, low:1, none:0 };
+
+  /* ── State ───────────────────────────────────────────────────────────── */
+  let allHistories    = [];   // [{ site, url, scans[] }]
+  let currentHistory  = null; // history being viewed
+  let currentScan     = null; // scan being viewed
+  let activeFilter    = 'all';
+  let sortCol = 'site', sortAsc = true;
+
+  /* ── Helpers ─────────────────────────────────────────────────────────── */
+  const $ = id => document.getElementById(id);
+
+  function domainLabel(url) {
+    try { return new URL(url).hostname.replace(/^www\./, ''); }
+    catch { return url; }
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString('pt-PT', { day:'2-digit', month:'short', year:'numeric' });
+  }
+
+  function worstSev(findings) {
+    let w = 'none';
+    for (const f of findings)
+      if (!f.passed && SEV_ORDER[f.severity] > SEV_ORDER[w]) w = f.severity;
+    return w;
+  }
+
+  function sevBadge(s) {
+    const cls = { high:'badge-high', medium:'badge-medium', low:'badge-low', none:'badge-none' };
+    return `<span class="badge ${cls[s]||'badge-none'}">${s}</span>`;
+  }
+
+  function catBadge(c) {
+    const m = { consentimento:'cat-consentimento', cookies:'cat-cookies', terceiros:'cat-terceiros', formularios:'cat-formularios', politica:'cat-politica' };
+    return `<span class="cat-badge ${m[c]||'cat-default'}">${c}</span>`;
+  }
+
+  function escHtml(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function trendHtml(scans) {
+    if (scans.length < 2) return '<span class="trend trend-flat">—</span>';
+    const last = scans[scans.length - 1];
+    const prev = scans[scans.length - 2];
+    const diff = last.passed - prev.passed;
+    if (diff > 0)  return `<span class="trend trend-up" title="+${diff} regras">↑ +${diff}</span>`;
+    if (diff < 0)  return `<span class="trend trend-down" title="${diff} regras">↓ ${diff}</span>`;
+    return '<span class="trend trend-flat">→ =</span>';
+  }
+
+  /* ── Data loading ────────────────────────────────────────────────────── */
+  async function loadAllData() {
+    let files;
+    try {
+      const r = await fetch(MANIFEST_URL);
+      files = r.ok ? await r.json() : SITES_FALLBACK;
+    } catch { files = SITES_FALLBACK; }
+
+    const results = await Promise.allSettled(files.map(async f => {
+      const r = await fetch(`data/${f}`);
+      if (!r.ok) throw new Error(`Cannot load ${f}`);
+      const raw = await r.json();
+      // Support both new history format and legacy flat format
+      if (raw.scans) return raw;
+      // Migrate legacy flat format on the fly
+      return {
+        site: f.replace('_pt.json', ''),
+        url: raw.url || raw.site_data?.url || '',
+        scans: raw.findings ? [{
+          date: raw.site_data?.scraped_at?.slice(0,10) || '—',
+          passed: raw.summary?.passed ?? 0,
+          failed: raw.summary?.failed ?? 0,
+          total:  raw.summary?.total  ?? 0,
+          findings: raw.findings || []
+        }] : []
+      };
+    }));
+
+    allHistories = results.filter(r => r.status === 'fulfilled').map(r => r.value);
+    results.filter(r => r.status === 'rejected').forEach(r => console.warn(r.reason));
+  }
+
+  /* ── Nível 1: Summary ────────────────────────────────────────────────── */
+  function updateGlobalStats() {
+    const latestScans = allHistories.map(h => h.scans[h.scans.length - 1]).filter(Boolean);
+    $('stat-sites').textContent  = allHistories.length;
+    $('stat-rules').textContent  = latestScans.reduce((s,sc) => s + sc.total,  0);
+    $('stat-passed').textContent = latestScans.reduce((s,sc) => s + sc.passed, 0);
+    $('stat-high').textContent   = latestScans.reduce((s,sc) =>
+      s + sc.findings.filter(f => !f.passed && f.severity==='high').length, 0);
+    const dates = latestScans.map(sc => sc.date).filter(Boolean).sort();
+    if (dates.length)
+      $('last-updated').textContent = 'Última actualização: ' + formatDate(dates[dates.length-1]);
+  }
+
+  function buildSummaryRow(history) {
+    const latest = history.scans[history.scans.length - 1];
+    if (!latest) return null;
+    const pct   = latest.total > 0 ? Math.round(latest.passed / latest.total * 100) : 0;
+    const worst = worstSev(latest.findings);
+    const label = domainLabel(history.url);
+    const scanCount = history.scans.length;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="site-name">${label}</div>
+        <div class="site-url">${history.url}</div>
+      </td>
+      <td>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <span class="progress-label">${latest.passed}/${latest.total}</span>
+        </div>
+      </td>
+      <td>${sevBadge(worst)}</td>
+      <td><span style="color:${latest.failed>0?'var(--red-text)':'var(--green-text)'};font-weight:600">${latest.failed}</span></td>
+      <td>${trendHtml(history.scans)}</td>
+      <td><span class="date-chip">${formatDate(latest.date)}</span></td>
+      <td><span style="color:var(--blue-text);font-size:.8rem">${scanCount} scan${scanCount!==1?'s':''} →</span></td>
+    `;
+    tr.addEventListener('click', () => showHistory(history));
+    return tr;
+  }
+
+  function renderSummary() {
+    const sorted = [...allHistories].sort((a, b) => {
+      const la = a.scans[a.scans.length-1] || {};
+      const lb = b.scans[b.scans.length-1] || {};
+      let va, vb;
+      switch (sortCol) {
+        case 'site':  return (sortAsc?1:-1) * domainLabel(a.url).localeCompare(domainLabel(b.url));
+        case 'score': va = la.total>0 ? la.passed/la.total : 0; vb = lb.total>0 ? lb.passed/lb.total : 0; break;
+        case 'severity': va = SEV_ORDER[worstSev(la.findings||[])]; vb = SEV_ORDER[worstSev(lb.findings||[])]; break;
+        case 'failed': va = la.failed??0; vb = lb.failed??0; break;
+        case 'date':  return (sortAsc?1:-1) * (la.date||'').localeCompare(lb.date||'');
+        default: return 0;
+      }
+      return sortAsc ? va-vb : vb-va;
+    });
+
+    const tbody = $('summary-body');
+    tbody.innerHTML = '';
+    if (!sorted.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2.5rem;color:var(--text-dim)">Nenhum resultado disponível.</td></tr>';
+      return;
+    }
+    sorted.forEach(h => { const tr = buildSummaryRow(h); if (tr) tbody.appendChild(tr); });
+  }
+
+  document.querySelectorAll('th[data-col]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col;
+      sortAsc = sortCol === col ? !sortAsc : true;
+      sortCol = col;
+      document.querySelectorAll('th[data-col]').forEach(h => {
+        h.classList.remove('sorted');
+        h.querySelector('.sort-arrow').textContent = '↕';
+      });
+      th.classList.add('sorted');
+      th.querySelector('.sort-arrow').textContent = sortAsc ? '↑' : '↓';
+      renderSummary();
+    });
+  });
+
+  /* ── Nível 2: História do site ───────────────────────────────────────── */
+  function showHistory(history) {
+    currentHistory = history;
+    const label = domainLabel(history.url);
+
+    $('history-site-name').textContent = label;
+    const link = $('history-site-url');
+    link.href = history.url; link.textContent = history.url;
+    $('history-count').textContent = `${history.scans.length} scan${history.scans.length!==1?'s':''}`;
+
+    const tbody = $('history-body');
+    tbody.innerHTML = '';
+
+    // Mostrar scans do mais recente para o mais antigo
+    const reversed = [...history.scans].reverse();
+    reversed.forEach((scan, idx) => {
+      const origIdx = history.scans.length - 1 - idx;
+      const prevScan = origIdx > 0 ? history.scans[origIdx - 1] : null;
+      const pct   = scan.total > 0 ? Math.round(scan.passed / scan.total * 100) : 0;
+      const high  = scan.findings.filter(f => !f.passed && f.severity==='high').length;
+      const med   = scan.findings.filter(f => !f.passed && f.severity==='medium').length;
+      const low   = scan.findings.filter(f => !f.passed && f.severity==='low').length;
+
+      let trendCell = '<span class="trend trend-flat">—</span>';
+      if (prevScan) {
+        const diff = scan.passed - prevScan.passed;
+        if (diff > 0) trendCell = `<span class="trend trend-up">↑ +${diff}</span>`;
+        else if (diff < 0) trendCell = `<span class="trend trend-down">↓ ${diff}</span>`;
+        else trendCell = '<span class="trend trend-flat">→ =</span>';
+      }
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="date-chip">${formatDate(scan.date)}</span></td>
+        <td>
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <span class="progress-label">${scan.passed}/${scan.total}</span>
+          </div>
+        </td>
+        <td>${trendCell}</td>
+        <td><span style="color:${high>0?'var(--red-text)':'var(--text-dim)'}">${high}</span></td>
+        <td><span style="color:${med>0?'var(--yellow-text)':'var(--text-dim)'}">${med}</span></td>
+        <td><span style="color:${low>0?'var(--blue-text)':'var(--text-dim)'}">${low}</span></td>
+        <td><span style="color:var(--accent);font-size:.8rem">Ver →</span></td>
+      `;
+      tr.addEventListener('click', () => showDetail(scan, history));
+      tbody.appendChild(tr);
+    });
+
+    navigate('history');
+    $('header-meta').textContent = label + ' — histórico';
+  }
+
+  /* ── Nível 3: Detalhe de um scan ─────────────────────────────────────── */
+  function showDetail(scan, history) {
+    currentScan = scan;
+    const h = history || currentHistory;
+    const label = domainLabel(h.url);
+    const failed = scan.failed ?? (scan.total - scan.passed);
+    const pct   = scan.total > 0 ? Math.round(scan.passed / scan.total * 100) : 0;
+    const worst = worstSev(scan.findings);
+
+    $('detail-site-name').textContent = label;
+    const link = $('detail-site-url');
+    link.href = h.url; link.textContent = h.url;
+
+    $('detail-stats-row').innerHTML = `
+      <div class="detail-stat">
+        <div class="detail-stat-val" style="color:var(--text-head)">${pct}%</div>
+        <div class="detail-stat-label">Conformidade</div>
+      </div>
+      <div class="detail-stat">
+        <div class="detail-stat-val" style="color:var(--green-text)">${scan.passed}</div>
+        <div class="detail-stat-label">Aprovadas</div>
+      </div>
+      <div class="detail-stat">
+        <div class="detail-stat-val" style="color:var(--red-text)">${failed}</div>
+        <div class="detail-stat-label">Falhas</div>
+      </div>
+      <div class="detail-stat">
+        <div class="detail-stat-val">${sevBadge(worst)}</div>
+        <div class="detail-stat-label">Pior severidade</div>
+      </div>
+      <div class="detail-stat">
+        <div class="detail-stat-val" style="color:var(--text-dim);font-size:1rem;font-family:'JetBrains Mono',monospace">${formatDate(scan.date)}</div>
+        <div class="detail-stat-label">Data do scan</div>
+      </div>
+    `;
+
+    activeFilter = 'all';
+    document.querySelectorAll('.filter-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.filter === 'all'));
+
+    renderFindings(scan.findings);
+    navigate('detail');
+    $('header-meta').textContent = label + ' · ' + formatDate(scan.date);
+  }
+
+  function renderFindings(findings) {
+    const container = $('findings-container');
+    container.innerHTML = '';
+    const filtered = findings.filter(f => {
+      if (activeFilter === 'all')    return true;
+      if (activeFilter === 'failed') return !f.passed;
+      if (activeFilter === 'passed') return f.passed;
+      return !f.passed && f.severity === activeFilter;
+    });
+    filtered.sort((a,b) => {
+      if (a.passed !== b.passed) return a.passed ? 1 : -1;
+      return (SEV_ORDER[b.severity]||0) - (SEV_ORDER[a.severity]||0);
+    });
+    if (!filtered.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">✓</div><div>Nenhuma ocorrência para o filtro seleccionado.</div></div>`;
+      return;
+    }
+    filtered.forEach(f => {
+      const cardCls = f.passed ? 'passed' : `failed-${f.severity||'medium'}`;
+      const icon = f.passed ? '✓' : (f.severity==='high'?'⚠':'●');
+      const iconColor = f.passed ? 'var(--green-text)' : f.severity==='high' ? 'var(--red-text)' : f.severity==='medium' ? 'var(--yellow-text)' : 'var(--blue-text)';
+      const card = document.createElement('div');
+      card.className = `finding-card ${cardCls}`;
+      card.innerHTML = `
+        <div class="finding-icon" style="color:${iconColor}">${icon}</div>
+        <div class="finding-body">
+          <div class="finding-top">
+            <span class="rule-id">${escHtml(f.rule_id)}</span>
+            ${catBadge(f.category)}
+            ${f.passed ? '' : sevBadge(f.severity)}
+          </div>
+          <div class="finding-title">${escHtml(f.title)}</div>
+          <div class="finding-desc">${escHtml(f.description||'')}</div>
+          ${f.evidence ? `<div class="finding-evidence">${escHtml(f.evidence)}</div>` : ''}
+          ${!f.passed && f.recommendation ? `<div class="finding-rec">${escHtml(f.recommendation)}</div>` : ''}
+          ${f.article ? `<div class="finding-article">${escHtml(f.article)}</div>` : ''}
+        </div>`;
+      container.appendChild(card);
+    });
+  }
+
+  /* ── Filtros ─────────────────────────────────────────────────────────── */
+  $('filter-bar').addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    activeFilter = btn.dataset.filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+    if (currentScan) renderFindings(currentScan.findings);
+  });
+
+  /* ── Navegação ───────────────────────────────────────────────────────── */
+  function navigate(page) {
+    ['summary','history','detail'].forEach(p =>
+      $(`page-${p}`).style.display = p === page ? 'block' : 'none');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  function showSummary() {
+    currentHistory = null; currentScan = null;
+    navigate('summary');
+    $('header-meta').textContent = 'Dashboard RGPD';
+  }
+
+  $('logo-link').addEventListener('click', showSummary);
+  $('history-back-btn').addEventListener('click', showSummary);
+  $('detail-back-btn').addEventListener('click', () => {
+    if (currentHistory) showHistory(currentHistory);
+    else showSummary();
+  });
+
+  /* ── Init ────────────────────────────────────────────────────────────── */
+  (async () => {
+    try {
+      await loadAllData();
+      updateGlobalStats();
+      renderSummary();
+    } catch (err) {
+      $('summary-body').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--red-text)">Erro ao carregar dados: ${err.message}</td></tr>`;
+    }
+  })();
+</script>
+</body>
+</html>

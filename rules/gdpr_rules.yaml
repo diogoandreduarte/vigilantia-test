@@ -1,0 +1,174 @@
+rules:
+
+  # ── CONSENTIMENTO ──────────────────────────────────────────────────────────
+
+  - id: RGPD-01
+    category: consentimento
+    name: "Banner de consentimento ausente"
+    description: "O site não apresenta banner de consentimento de cookies."
+    severity: high
+    article: "Art. 6.º RGPD / ePrivacy Directive"
+    recommendation: "Implementar um CMP (Consent Management Platform) antes de carregar cookies não essenciais."
+
+  # ── COOKIES ────────────────────────────────────────────────────────────────
+
+  - id: RGPD-02
+    category: cookies
+    name: "Cookies de terceiros sem consentimento"
+    description: "Existem cookies de domínios terceiros, o que requer consentimento explícito."
+    severity: high
+    article: "Art. 6.º RGPD"
+    recommendation: "Bloquear cookies de terceiros até o utilizador dar consentimento via CMP."
+
+  - id: RGPD-03
+    category: cookies
+    name: "Cookie de tracking sem flag Secure"
+    description: "Cookies de rastreio não têm a flag Secure ativa, podendo viajar por HTTP."
+    severity: medium
+    article: "Art. 32.º RGPD"
+    recommendation: "Definir Secure=True em todos os cookies de tracking."
+
+  - id: RGPD-04
+    category: cookies
+    name: "Cookie de sessão sem flag HttpOnly"
+    description: "Cookies de sessão sem HttpOnly ficam expostos a ataques XSS."
+    severity: medium
+    article: "Art. 32.º RGPD"
+    recommendation: "Definir HttpOnly=True em todos os cookies de sessão."
+
+  # ── TERCEIROS ──────────────────────────────────────────────────────────────
+
+  - id: RGPD-05
+    category: terceiros
+    name: "Script de analytics sem consentimento"
+    description: "Scripts de analytics (ex: Google Analytics) carregam sem consentimento prévio."
+    severity: high
+    article: "Art. 6.º RGPD"
+    recommendation: "Carregar scripts de analytics apenas após consentimento explícito do utilizador."
+
+  - id: RGPD-06
+    category: terceiros
+    name: "Script de publicidade sem consentimento"
+    description: "Scripts de publicidade carregam sem consentimento prévio explícito."
+    severity: high
+    article: "Art. 6.º RGPD"
+    recommendation: "Bloquear scripts de advertising até obter consentimento via CMP."
+
+  # ── FORMULÁRIOS ────────────────────────────────────────────────────────────
+
+  - id: RGPD-07
+    category: formularios
+    name: "Formulário sem aviso de privacidade"
+    description: "Formulários que recolhem dados pessoais não têm aviso de tratamento junto."
+    severity: medium
+    article: "Art. 13.º RGPD"
+    recommendation: "Adicionar texto junto a cada formulário explicando finalidade, responsável e direitos."
+
+  - id: RGPD-08
+    category: formularios
+    name: "Formulário de dados pessoais com método GET"
+    description: "Formulários de contacto/login usam GET, expondo dados na URL."
+    severity: medium
+    article: "Art. 32.º RGPD"
+    recommendation: "Alterar o método dos formulários de dados pessoais para POST."
+
+  # ── POLÍTICA DE PRIVACIDADE ────────────────────────────────────────────────
+
+  - id: RGPD-09
+    category: politica
+    name: "Política de privacidade ausente"
+    description: "Não foi encontrado link para política de privacidade na página."
+    severity: high
+    article: "Art. 13.º e 14.º RGPD"
+    recommendation: "Publicar política de privacidade e linkar no rodapé de todas as páginas."
+
+  - id: RGPD-10
+    category: politica
+    name: "Política não menciona consentimento"
+    description: "O texto da política de privacidade não menciona a palavra 'consentimento'."
+    severity: medium
+    article: "Art. 7.º RGPD"
+    recommendation: "Incluir secção sobre como e quando é obtido consentimento dos utilizadores."
+    keywords: ["consentimento", "consent"]
+
+  - id: RGPD-11
+    category: politica
+    name: "Política não menciona direito ao apagamento"
+    description: "A política não menciona o direito ao apagamento ('direito a ser esquecido')."
+    severity: medium
+    article: "Art. 17.º RGPD"
+    recommendation: "Incluir secção sobre o direito ao apagamento e como os utilizadores o podem exercer."
+    keywords: ["apagamento", "esquecido", "erasure", "right to be forgotten"]
+
+  - id: RGPD-12
+    category: politica
+    name: "Política não identifica o responsável pelo tratamento"
+    description: "A política não menciona quem é o responsável pelo tratamento de dados."
+    severity: high
+    article: "Art. 13.º n.º 1 RGPD"
+    recommendation: "Identificar claramente o responsável pelo tratamento (nome, morada, contacto)."
+    keywords: ["responsável pelo tratamento", "data controller", "responsável", "controller"]
+
+  - id: RGPD-13
+    category: politica
+    name: "Política não menciona contacto do DPO"
+    description: "A política não inclui dados de contacto do Encarregado de Proteção de Dados (DPO)."
+    severity: low
+    article: "Art. 13.º n.º 1 alínea b) RGPD"
+    recommendation: "Incluir email ou formulário de contacto do DPO na política de privacidade."
+    keywords: ["DPO", "encarregado", "data protection officer", "encarregado de proteção"]
+
+  - id: RGPD-14
+    category: politica
+    name: "Idioma da política não corresponde ao idioma do site"
+    description: "A política de privacidade está num idioma diferente do idioma principal do site."
+    severity: medium
+    article: "Art. 12.º RGPD"
+    recommendation: "Traduzir a política de privacidade para o idioma principal do site."
+
+  - id: RGPD-15
+    category: politica
+    name: "Política não menciona direito de acesso aos dados"
+    description: "A política não informa o utilizador sobre o seu direito de acesso aos dados pessoais."
+    severity: medium
+    article: "Art. 15.º RGPD"
+    recommendation: "Incluir secção sobre o direito de acesso e como os utilizadores o podem exercer."
+    keywords: ["direito de acesso", "acesso aos dados", "right of access", "right to access", "aceder aos seus dados"]
+
+  - id: RGPD-16
+    category: politica
+    name: "Política não menciona transferências internacionais de dados"
+    description: "A política não informa sobre possíveis transferências de dados para fora da UE."
+    severity: medium
+    article: "Art. 44.º a 49.º RGPD"
+    recommendation: "Indicar se existem transferências internacionais, para que países e com que garantias."
+    keywords: ["transferências internacionais", "international transfers", "terceiros países", "third countries", "fora da união europeia", "outside the eu"]
+
+  - id: RGPD-17
+    category: politica
+    name: "Política não indica prazo de conservação dos dados"
+    description: "A política não especifica durante quanto tempo os dados pessoais são conservados."
+    severity: low
+    article: "Art. 13.º n.º 2 alínea a) RGPD"
+    recommendation: "Indicar os prazos de conservação para cada tipo de dado ou os critérios usados para os determinar."
+    keywords: ["prazo de conservação", "período de conservação", "retention period", "conservados durante", "guardados por", "eliminados após", "deleted after"]
+
+  # ── FORMULÁRIOS (cont.) ────────────────────────────────────────────────────
+
+  - id: RGPD-18
+    category: formularios
+    name: "Campo de password sem autocomplete adequado"
+    description: "Campos de password não têm o atributo autocomplete='new-password' ou 'current-password'."
+    severity: low
+    article: "Art. 32.º RGPD"
+    recommendation: "Adicionar autocomplete='new-password' em campos de registo e 'current-password' em campos de login."
+
+  # ── TERCEIROS (cont.) ─────────────────────────────────────────────────────
+
+  - id: RGPD-19
+    category: terceiros
+    name: "Google Analytics (Universal) sem anonimização de IP"
+    description: "O site usa Universal Analytics (analytics.js) que requer configuração explícita de anonimização de IP."
+    severity: medium
+    article: "Art. 5.º n.º 1 alínea c) RGPD"
+    recommendation: "Ativar anonymize_ip: true na configuração do Google Analytics, ou migrar para GA4 que anonimiza por defeito."

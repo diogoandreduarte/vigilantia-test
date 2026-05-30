@@ -1,0 +1,20 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+dist/
+*.egg-info/
+.pytest_cache/
+htmlcov/
+
+# Outputs gerados pela CLI (raiz do projeto)
+relatorio*.html
+relatorio*.pdf
+resultado*.json
+
+# Notas locais de desenvolvimento
+DIOGO_NOTES.md
+Plano_de_Trabalho_RGPD_Scraper.docx
+Relatório da sessão.docx

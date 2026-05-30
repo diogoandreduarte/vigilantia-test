@@ -1,0 +1,28 @@
+{
+  "site": "sapo_pt",
+  "url": "https://sapo.pt",
+  "scans": [
+    {
+      "date": "2026-05-29",
+      "passed": 8,
+      "failed": 6,
+      "total": 14,
+      "findings": [
+        {"rule_id":"RGPD-01","category":"consentimento","severity":"high","title":"Banner de consentimento ausente","description":"O site não apresenta banner de consentimento de cookies.","evidence":"consent_banner_detected = False","recommendation":"Implementar um CMP (Consent Management Platform) antes de carregar cookies não essenciais.","article":"Art. 6.º RGPD / ePrivacy Directive","passed":false},
+        {"rule_id":"RGPD-02","category":"cookies","severity":"high","title":"Cookies de terceiros sem consentimento","description":"Existem cookies de domínios terceiros, o que requer consentimento explícito.","evidence":null,"recommendation":"Bloquear cookies de terceiros até o utilizador dar consentimento via CMP.","article":"Art. 6.º RGPD","passed":true},
+        {"rule_id":"RGPD-03","category":"cookies","severity":"medium","title":"Cookie de tracking sem flag Secure","description":"Cookies de rastreio não têm a flag Secure ativa, podendo viajar por HTTP.","evidence":"Cookies sem Secure: ['_vwo_uuid_v2']","recommendation":"Definir Secure=True em todos os cookies de tracking.","article":"Art. 32.º RGPD","passed":false},
+        {"rule_id":"RGPD-04","category":"cookies","severity":"medium","title":"Cookie de sessão sem flag HttpOnly","description":"Cookies de sessão sem HttpOnly ficam expostos a ataques XSS.","evidence":"Cookies sem HttpOnly: ['_vwo_uuid_v2']","recommendation":"Definir HttpOnly=True em todos os cookies de sessão.","article":"Art. 32.º RGPD","passed":false},
+        {"rule_id":"RGPD-05","category":"terceiros","severity":"high","title":"Script de analytics sem consentimento","description":"Scripts de analytics carregam sem consentimento prévio.","evidence":"Scripts de analytics sem consentimento: ['https://www.googletagmanager.com/gtm.js']","recommendation":"Carregar scripts de analytics apenas após consentimento explícito do utilizador.","article":"Art. 6.º RGPD","passed":false},
+        {"rule_id":"RGPD-06","category":"terceiros","severity":"high","title":"Script de publicidade sem consentimento","description":"Scripts de publicidade carregam sem consentimento prévio explícito.","evidence":"Scripts de publicidade sem consentimento: ['https://securepubads.g.doubleclick.net/tag/js/gpt.js']","recommendation":"Bloquear scripts de advertising até obter consentimento via CMP.","article":"Art. 6.º RGPD","passed":false},
+        {"rule_id":"RGPD-07","category":"formularios","severity":"medium","title":"Formulário sem aviso de privacidade","description":"Formulários que recolhem dados pessoais não têm aviso de tratamento junto.","evidence":null,"recommendation":"Adicionar texto junto a cada formulário.","article":"Art. 13.º RGPD","passed":true},
+        {"rule_id":"RGPD-08","category":"formularios","severity":"medium","title":"Formulário de dados pessoais com método GET","description":"Formulários de contacto/login usam GET, expondo dados na URL.","evidence":null,"recommendation":"Alterar o método para POST.","article":"Art. 32.º RGPD","passed":true},
+        {"rule_id":"RGPD-09","category":"politica","severity":"high","title":"Política de privacidade ausente","description":"Não foi encontrado link para política de privacidade.","evidence":null,"recommendation":"Publicar política de privacidade.","article":"Art. 13.º e 14.º RGPD","passed":true},
+        {"rule_id":"RGPD-10","category":"politica","severity":"medium","title":"Política não menciona consentimento","description":"O texto da política não menciona 'consentimento'.","evidence":null,"recommendation":"Incluir secção sobre consentimento.","article":"Art. 7.º RGPD","passed":true},
+        {"rule_id":"RGPD-11","category":"politica","severity":"medium","title":"Política não menciona direito ao apagamento","description":"A política não menciona o direito ao apagamento.","evidence":null,"recommendation":"Incluir secção sobre o direito ao apagamento.","article":"Art. 17.º RGPD","passed":true},
+        {"rule_id":"RGPD-12","category":"politica","severity":"high","title":"Política não identifica o responsável pelo tratamento","description":"A política não menciona o responsável pelo tratamento.","evidence":null,"recommendation":"Identificar claramente o responsável.","article":"Art. 13.º n.º 1 RGPD","passed":true},
+        {"rule_id":"RGPD-13","category":"politica","severity":"low","title":"Política não menciona contacto do DPO","description":"A política não inclui dados de contacto do DPO.","evidence":"Termos ausentes na política: ['DPO / encarregado de proteção']","recommendation":"Incluir contacto do DPO.","article":"Art. 13.º n.º 1 alínea b) RGPD","passed":false},
+        {"rule_id":"RGPD-14","category":"politica","severity":"medium","title":"Idioma da política não corresponde ao idioma do site","description":"A política está num idioma diferente do idioma principal do site.","evidence":null,"recommendation":"Traduzir a política para o idioma principal.","article":"Art. 12.º RGPD","passed":true}
+      ]
+    }
+  ]
+}

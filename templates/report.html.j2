@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório RGPD — Vigilantia</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; font-size: 14px; color: #222; margin: 2em; line-height: 1.5; }
+        h1 { font-size: 1.6em; color: #2c3e50; margin-bottom: 0.2em; }
+        h2 { font-size: 1.2em; color: #2c3e50; margin: 1.4em 0 0.6em; border-bottom: 1px solid #ddd; padding-bottom: 0.3em; }
+        .meta { color: #666; font-size: 0.9em; margin-bottom: 1em; }
+
+        /* Resumo */
+        .summary { display: flex; gap: 1em; margin: 1em 0; flex-wrap: wrap; }
+        .badge { padding: 0.5em 1em; border-radius: 6px; font-weight: bold; font-size: 1em; }
+        .badge-high   { background: #fdecea; color: #c0392b; }
+        .badge-medium { background: #fef9e7; color: #d68910; }
+        .badge-low    { background: #eafaf1; color: #1e8449; }
+        .badge-ok     { background: #eaf4fb; color: #1a5276; }
+
+        /* Tabela */
+        table { border-collapse: collapse; width: 100%; margin-top: 0.5em; }
+        th, td { border: 1px solid #ddd; padding: 0.5em 0.7em; vertical-align: top; }
+        th { background: #f4f6f7; font-weight: bold; }
+        tr:nth-child(even) { background: #fafafa; }
+
+        .sev-high   { color: #c0392b; font-weight: bold; }
+        .sev-medium { color: #d68910; font-weight: bold; }
+        .sev-low    { color: #1e8449; font-weight: bold; }
+        .sev-info   { color: #555; }
+
+        .cat { display: inline-block; background: #eee; border-radius: 4px; padding: 0 6px; font-size: 0.85em; }
+
+        /* Passed */
+        .passed-table td { color: #555; }
+        .passed-table tr:nth-child(even) { background: #f9fbf9; }
+        .ok-mark { color: #1e8449; font-weight: bold; }
+
+        .disclaimer { margin-top: 2em; font-size: 0.85em; color: #999; border-top: 1px solid #eee; padding-top: 0.8em; }
+
+        /* Gráfico de barras */
+        .chart { margin: 1em 0; }
+        .bar-row { display: flex; align-items: center; gap: 0.6em; margin: 0.3em 0; font-size: 0.9em; }
+        .bar-label { width: 5em; text-align: right; color: #555; }
+        .bar-track { flex: 1; background: #f0f0f0; border-radius: 4px; height: 18px; }
+        .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+        .bar-high   { background: #e74c3c; }
+        .bar-medium { background: #f39c12; }
+        .bar-low    { background: #2ecc71; }
+        .bar-ok     { background: #3498db; }
+        .bar-count  { width: 2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Relatório de Conformidade RGPD</h1>
+    {% if site_url %}
+    <p class="meta">Site: <strong>{{ site_url }}</strong>{% if scraped_at %} &nbsp;|&nbsp; Análise: {{ scraped_at }}{% endif %}</p>
+    {% endif %}
+
+    <h2>Resumo</h2>
+    <div class="summary">
+        <span class="badge badge-high">🔴 Graves: {{ summary.high }}</span>
+        <span class="badge badge-medium">🟡 Médios: {{ summary.medium }}</span>
+        <span class="badge badge-low">🟢 Baixos: {{ summary.low }}</span>
+        <span class="badge badge-ok">✅ Conformes: {{ passed | length }}</span>
+    </div>
+
+    {% set total = (summary.high + summary.medium + summary.low + (passed | length)) %}
+    {% if total > 0 %}
+    <div class="chart">
+        {% for item in [
+            ("Graves",   summary.high,       "bar-high"),
+            ("Médios",   summary.medium,     "bar-medium"),
+            ("Baixos",   summary.low,        "bar-low"),
+            ("Conformes",passed | length,    "bar-ok")
+        ] %}
+        {% if item[1] > 0 %}
+        <div class="bar-row">
+            <span class="bar-label">{{ item[0] }}</span>
+            <div class="bar-track">
+                <div class="bar-fill {{ item[2] }}" style="width: {{ (item[1] / total * 100) | round(1) }}%"></div>
+            </div>
+            <span class="bar-count">{{ item[1] }}</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if failed %}
+    <h2>Não-Conformidades ({{ failed | length }})</h2>
+    <table>
+        <tr>
+            <th>ID</th><th>Categoria</th><th>Gravidade</th><th>Título</th>
+            <th>Evidência</th><th>Recomendação</th><th>Artigo</th>
+        </tr>
+        {% for f in failed %}
+        <tr>
+            <td>{{ f.rule_id }}</td>
+            <td><span class="cat">{{ f.category.value }}</span></td>
+            <td class="sev-{{ f.severity.value }}">{{ f.severity.value | upper }}</td>
+            <td>{{ f.title }}</td>
+            <td>{{ f.evidence or '—' }}</td>
+            <td>{{ f.recommendation }}</td>
+            <td>{{ f.article or '—' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p style="color:#1e8449; margin-top:0.8em;">Nenhuma não-conformidade detetada.</p>
+    {% endif %}
+
+    {% if passed %}
+    <h2>Regras Cumpridas ({{ passed | length }})</h2>
+    <table class="passed-table">
+        <tr><th>ID</th><th>Categoria</th><th>Título</th><th>Artigo</th></tr>
+        {% for f in passed %}
+        <tr>
+            <td>{{ f.rule_id }}</td>
+            <td><span class="cat">{{ f.category.value }}</span></td>
+            <td><span class="ok-mark">✅</span> {{ f.title }}</td>
+            <td>{{ f.article or '—' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    <div class="disclaimer"><strong>Aviso Legal:</strong> {{ legal_disclaimer }}</div>
+</body>
+</html>

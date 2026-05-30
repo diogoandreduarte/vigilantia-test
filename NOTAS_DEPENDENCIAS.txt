@@ -1,0 +1,64 @@
+# Notas de Dependências — Vigilantia
+
+Comandos e notas adicionais para garantir o correto funcionamento do projeto.
+
+---
+
+## Ambiente Virtual
+
+Criar e ativar (Python 3.14):
+```
+py -3.14 -m venv .venv
+.venv\Scripts\Activate
+```
+
+Se der erro de política de execução no PowerShell:
+```
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+---
+
+## Instalação de Dependências
+
+Instalar tudo de uma vez:
+```
+pip install -r requirements.txt
+```
+
+Ou instalar manualmente os pacotes principais:
+```
+pip install requests beautifulsoup4 playwright pydantic typer pyyaml jinja2 weasyprint langdetect
+```
+
+---
+
+## Passos Adicionais Após Instalação
+
+### Playwright (browsers)
+Após instalar o pacote, é obrigatório instalar os browsers:
+```
+python -m playwright install
+```
+Ou apenas o Chromium (mais leve):
+```
+python -m playwright install chromium
+```
+
+### WeasyPrint (PDF)
+Em Windows o pip instala tudo automaticamente.
+Se houver erros com fontes ou Cairo, consultar:
+https://weasyprint.readthedocs.io/en/latest/install.html
+
+---
+
+## Atualização de Dependências
+
+Sempre que instalar um pacote novo:
+1. Adicionar ao `pyproject.toml` (secção `dependencies`)
+2. Atualizar `requirements.txt` com `pip freeze > requirements.txt`
+3. Registar aqui se precisar de passos manuais adicionais
+
+---
+
+Última atualização: 2026-05-29
