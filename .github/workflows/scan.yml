@@ -27,7 +27,7 @@ on:
       commit_results:
         description: "Guardar resultados no repo (atualiza GitHub Pages)"
         required: true
-        default: "true"
+        default: true
         type: boolean
 
 env:
@@ -96,7 +96,8 @@ jobs:
           pip install \
             "requests>=2.34.2" "beautifulsoup4>=4.14.3" "playwright>=1.60.0" \
             "pydantic>=2.13.4" "typer>=0.26.2" "pyyaml>=6.0" \
-            "jinja2>=3.1" "weasyprint>=62.0" "spacy>=3.7" "langdetect>=1.0.9"
+            "jinja2>=3.1" "weasyprint>=62.0" "spacy>=3.7" "langdetect>=1.0.9" \
+            "click>=8.0"
 
       - name: Download modelo spaCy
         run: python -m spacy download ${{ env.SPACY_MODEL }}
