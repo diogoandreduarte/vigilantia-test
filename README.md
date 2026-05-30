@@ -19,10 +19,10 @@ A **Vigilantia** é uma aplicação Python que recebe um URL, visita o website, 
 - Classificação de scripts por categoria (analytics, advertising, social)
 
 **Módulo Analisador RGPD (Diogo)**
-- 14 regras RGPD verificadas automaticamente por categoria:
+- 19 regras RGPD verificadas automaticamente por categoria:
   - Consentimento, Cookies, Scripts de Terceiros, Formulários, Política de Privacidade
 - Motor de regras configurável via `rules/gdpr_rules.yaml`
-- Análise de texto da política de privacidade (NLP + keyword matching)
+- Deteção de idioma da política de privacidade (spaCy/langdetect) e verificação por keyword matching
 - Geração de relatórios HTML, PDF e JSON
 - CLI completa com flags para todos os formatos de saída
 
@@ -38,7 +38,8 @@ A **Vigilantia** é uma aplicação Python que recebe um URL, visita o website, 
 | `PyYAML` | Carregamento das regras RGPD |
 | `Jinja2` | Templates HTML para relatórios |
 | `WeasyPrint` | Geração de PDF a partir de HTML |
-| `langdetect` | Deteção de idioma da política de privacidade |
+| `spacy` | Deteção de idioma e NLP (opcional, com fallback) |
+| `langdetect` | Deteção de idioma da política de privacidade (fallback) |
 | `Typer` | Interface de linha de comandos |
 
 ---
@@ -55,20 +56,23 @@ vigilantia/
 │   │   └── collector.py         # orquestração do scraping
 │   ├── analyzer/
 │   │   ├── rule_engine.py       # motor de regras RGPD
-│   │   ├── privacy_text.py      # análise NLP da política
+│   │   ├── privacy_text.py      # deteção de idioma e keyword matching
 │   │   └── reporter.py          # geração HTML/PDF/JSON
 │   ├── models/
 │   │   ├── site_data.py         # contrato de dados scraper→analyzer
 │   │   └── finding.py           # schema de uma não-conformidade
 │   └── cli.py                   # ponto de entrada CLI
 ├── rules/
-│   └── gdpr_rules.yaml          # 14 regras RGPD configuráveis
+│   └── gdpr_rules.yaml          # 19 regras RGPD configuráveis
 ├── templates/
 │   └── report.html.j2           # template do relatório
+├── scripts/
+│   └── append_scan.py           # atualiza histórico e manifest
 ├── tests/
 │   ├── test_rule_engine.py
 │   ├── test_reporter.py
-│   └── test_cli.py
+│   ├── test_cli.py
+│   └── test_scraper.py
 └── pyproject.toml
 ```
 
@@ -80,7 +84,7 @@ vigilantia/
 flowchart TD
     A[Utilizador fornece URL] --> B[Scraper recolhe dados]
     B --> C[SiteData estruturado]
-    C --> D[RuleEngine avalia 14 regras RGPD]
+    C --> D[RuleEngine avalia 19 regras RGPD]
     D --> E[Lista de Findings pass/fail]
     E --> F1[Relatório HTML]
     E --> F2[Relatório PDF]
@@ -92,13 +96,15 @@ flowchart TD
 ## Instalação
 
 ```bash
-git clone https://github.com/user/vigilantia.git
+git clone https://github.com/<username>/<repo>.git
 cd vigilantia
-py -3.14 -m venv .venv        # Windows (requer Python 3.14)
+py -3.14 -m venv .venv        # Windows (requer Python >= 3.14 localmente)
 .venv\Scripts\activate
-pip install -r requirements.txt
-playwright install chromium
+pip install .
+python -m playwright install --with-deps chromium
 ```
+
+> **Nota:** os pipelines de CI correm em Python 3.13 (runners do GitHub ainda não têm 3.14). Localmente é necessário Python 3.14 ou superior conforme definido em `pyproject.toml`.
 
 ---
 
@@ -108,7 +114,7 @@ playwright install chromium
 python -m src.cli --help
 ```
 
-A CLI tem dois comandos: `analyze` e `serve`.
+Deve ser executado a partir da raiz do projeto. A CLI tem dois comandos: `analyze` e `serve`.
 
 ### analyze — analisar um site
 
@@ -121,7 +127,7 @@ Options:
   --pdf PATH           Gerar relatório PDF neste ficheiro
   -r, --rules PATH     Ficheiro de regras YAML  [default: rules/gdpr_rules.yaml]
   -q, --quiet          Mostrar apenas não-conformidades
-  --no-history         Não atualizar o histórico do dashboard
+  --no-history         Não guardar resultados em docs/data/ nem gerar PDF automático
 ```
 
 ### serve — abrir o dashboard localmente
@@ -130,13 +136,13 @@ Options:
 Usage: python -m src.cli serve [OPTIONS]
 
 Options:
-  -p, --port INT       Porta do servidor  [default: 8080]
+  -p, --port INTEGER   Porta do servidor  [default: 8080]
   --no-browser         Não abrir o browser automaticamente
 ```
 
 ### Exemplos
 
-Análise rápida (atualiza o dashboard automaticamente se `docs/data/` existir):
+Análise rápida (guarda automaticamente em `docs/data/` e gera PDF se essa pasta existir):
 ```bash
 python -m src.cli analyze https://exemplo.com
 ```
@@ -178,7 +184,7 @@ python -m src.cli serve --port 9000
 
 ### Popular o dashboard com dados
 
-Cada análise appenda automaticamente ao histórico se `docs/data/` existir:
+Cada análise guarda automaticamente o resultado em `docs/data/` e atualiza `manifest.json` se essa pasta existir:
 
 ```bash
 python -m src.cli analyze https://sapo.pt --quiet
@@ -186,21 +192,13 @@ python -m src.cli analyze https://publico.pt --quiet
 python -m src.cli analyze https://dn.pt --quiet
 ```
 
-Os resultados ficam em `docs/data/<site>.json` e o dashboard atualiza ao recarregar a página.
-
-### Adicionar um site ao manifest
-
-Para que o dashboard carregue um novo site, adiciona o seu ficheiro a `docs/data/manifest.json`:
-
-```json
-["sapo_pt.json", "publico_pt.json", "dn_pt.json"]
-```
-
-> **Nota:** o manifest tem de ser atualizado manualmente sempre que se adiciona um novo site, tanto em execução local como no GitHub Actions.
+Os resultados ficam em `docs/data/<site>.json`, o `manifest.json` é atualizado automaticamente e o dashboard atualiza ao recarregar a página.
 
 ### GitHub Pages
 
-Quando o repositório estiver no GitHub, ativa o Pages em **Settings → Pages → Branch: main / Folder: /docs**. O dashboard fica disponível em `https://<username>.github.io/<repo>/` e é atualizado automaticamente pelo workflow `scan.yml`.
+O dashboard está disponível em `https://<username>.github.io/<repo>/` (GitHub Pages configurado em **Settings → Pages → Branch: main / Folder: /docs**). É atualizado automaticamente sempre que o workflow `scan.yml` corre com `commit_results` ativo.
+
+O dashboard inclui um botão **▶ Run Scan** que abre diretamente a página do workflow no GitHub (só visível quando acedido via GitHub Pages).
 
 ---
 
@@ -217,6 +215,8 @@ Corre automaticamente em cada **push** ou **pull request** para `main`. Não req
 ```
 push para main  →  GitHub Actions corre pytest automaticamente
 ```
+
+> Os testes de CI cobrem `test_rule_engine.py` e `test_reporter.py`. Para correr todos os testes localmente ver a secção [Testes](#testes).
 
 ---
 
@@ -241,20 +241,20 @@ Corre manualmente quando quiseres. Analisa um ou mais sites e atualiza o dashboa
 
 6. Clica em **Run workflow** (botão verde)
 
-O workflow corre o scraper, gera o relatório e — se `commit_results` estiver ativo — faz commit dos resultados para `docs/data/`, atualizando o dashboard automaticamente.
+O workflow corre o scraper, gera o relatório e — se `commit_results` estiver ativo — faz commit dos resultados para `docs/data/`. O `manifest.json` é atualizado automaticamente.
 
 **Exemplo — analisar todos os sites predefinidos:**
 - `sites` → `all`
 - `custom_url` → *(vazio)*
 - `commit_results` → `true`
 
-**Exemplo — analisar um site novo sem alterar código:**
-- `sites` → `none`
+**Exemplo — analisar um site novo:**
+- `sites` → `all` *(ou qualquer valor — é ignorado quando `custom_url` está preenchido)*
 - `custom_url` → `https://dn.pt`
 - `custom_label` → `dn_pt`
 - `commit_results` → `true`
 
-> Após o workflow terminar, adiciona `dn_pt.json` ao `docs/data/manifest.json` para o dashboard o mostrar.
+> **Atenção:** o valor `none` em `sites` só é válido quando `custom_url` e `custom_label` estão ambos preenchidos. Se `sites` for `none` e `custom_url` estiver vazio, o workflow termina com erro.
 
 ---
 
@@ -292,6 +292,11 @@ As regras estão definidas em `rules/gdpr_rules.yaml` e podem ser editadas ou es
 python -m pytest tests/ -v
 ```
 
+> Alguns testes (`test_cli.py`, `test_scraper.py`) requerem Playwright instalado e acesso à rede. Para correr apenas o subconjunto coberto por CI:
+> ```bash
+> python -m pytest tests/test_rule_engine.py tests/test_reporter.py -v
+> ```
+
 ---
 
 ## Roadmap
@@ -304,24 +309,23 @@ python -m pytest tests/ -v
 - [x] Modelos de dados com Pydantic (`SiteData`, `Finding`)
 - [x] 19 regras RGPD configuráveis em YAML
 - [x] Motor de regras com avaliadores explícitos por regra
-- [x] Análise NLP da política de privacidade
+- [x] Deteção de idioma e keyword matching na política de privacidade
 - [x] Geração de relatório HTML e PDF
 - [x] CLI completa com Typer
-- [x] Testes automáticos (rule engine, reporter, cli)
-- [x] CI/CD com GitHub Actions (unit tests + scan semanal)
-- [x] Dashboard GitHub Pages com resultados por site
+- [x] Testes automáticos (rule engine, reporter, scraper, cli)
+- [x] CI/CD com GitHub Actions (unit tests + scan on-demand)
+- [x] Dashboard GitHub Pages com resultados por site e histórico
 - [x] DISCLAIMER.md (aviso legal obrigatório)
-- [x] 5 regras RGPD adicionais (RGPD-15 a 19)
 - [x] Gráfico de barras no relatório HTML
+- [x] Download do relatório PDF a partir do dashboard
 - [ ] Análise de múltiplas páginas por domínio
-- [x] Dashboard web com histórico de análises ao longo do tempo
 
 ---
 
 ## Autores
 
 - **João Rêgo** — módulo de scraping (`src/scraper/`, `src/models/site_data.py`)
-- **Diogo Duarte** — módulo analisador RGPD (`src/analyzer/`, `src/models/finding.py`, `rules/`, `templates/`, `src/cli.py`)
+- **Diogo Duarte** — módulo analisador RGPD (`src/analyzer/`, `src/models/finding.py`, `rules/`, `templates/`, `src/cli.py`, `scripts/`, `docs/`, `.github/workflows/`)
 
 ---
 
