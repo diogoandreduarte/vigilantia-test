@@ -31,8 +31,8 @@ def _history_path(url: str) -> Optional[Path]:
         return None
 
 
-def _append_to_history(url: str, result_json_path: str) -> Optional[Path]:
-    """Appenda o resultado ao histórico do dashboard. Retorna o path atualizado ou None."""
+def _append_to_history(url: str, result_json_path: str, pdf_path: Optional[str] = None) -> Optional[Path]:
+    """Appenda o resultado ao histórico do dashboard. Gera e guarda o PDF se docs/data/ existir."""
     hist_path = _history_path(url)
     if not hist_path:
         return None
@@ -41,10 +41,10 @@ def _append_to_history(url: str, result_json_path: str) -> Optional[Path]:
         script = Path(__file__).parent.parent / "scripts" / "append_scan.py"
         label = hist_path.stem
         today = date.today().isoformat()
-        subprocess.run(
-            [sys.executable, str(script), label, url, today, result_json_path, str(hist_path)],
-            check=True, capture_output=True,
-        )
+        cmd = [sys.executable, str(script), label, url, today, result_json_path, str(hist_path)]
+        if pdf_path:
+            cmd.append(pdf_path)
+        subprocess.run(cmd, check=True, capture_output=True)
         return hist_path
     except Exception:
         return None
@@ -133,9 +133,23 @@ def analyze(
 
         # 7. Histórico do dashboard (automático se docs/data/ existir)
         if not no_history:
-            hist = _append_to_history(url, tmp_path)
+            # Gerar PDF temporário para guardar no histórico
+            pdf_for_history: Optional[str] = None
+            hist_path = _history_path(url)
+            if hist_path:
+                try:
+                    from datetime import date
+                    pdf_name = f"{hist_path.stem}_{date.today().isoformat()}.pdf"
+                    pdf_for_history = str(hist_path.parent / pdf_name)
+                    generate_pdf_report(findings, pdf_for_history, site_data=site_data)
+                except Exception:
+                    pdf_for_history = None
+
+            hist = _append_to_history(url, tmp_path, pdf_path=pdf_for_history)
             if hist:
                 typer.echo(f"Historico atualizado: {hist}")
+                if pdf_for_history and os.path.exists(pdf_for_history):
+                    typer.echo(f"PDF guardado: {pdf_for_history}")
     finally:
         os.remove(tmp_path)
 

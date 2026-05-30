@@ -119,6 +119,7 @@ jobs:
           python -m src.cli analyze "${URL}" \
             --output "scan-results/${LABEL}_${DATE}.json" \
             --html   "scan-results/${LABEL}_${DATE}.html" \
+            --pdf    "scan-results/${LABEL}_${DATE}.pdf" \
             --quiet --no-history || true
           echo "date=${DATE}" >> "$GITHUB_OUTPUT"
 
@@ -132,7 +133,8 @@ jobs:
             "${{ matrix.url }}" \
             "${DATE}" \
             "scan-results/${LABEL}_${DATE}.json" \
-            "docs/data/${LABEL}_pt.json"
+            "docs/data/${LABEL}_pt.json" \
+            "scan-results/${LABEL}_${DATE}.pdf"
 
       - name: Commit historico para o repo
         if: ${{ github.event.inputs.commit_results == 'true' }}
@@ -142,6 +144,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/data/${{ matrix.label }}_pt.json
+          ls docs/data/${{ matrix.label }}_*.pdf 2>/dev/null && git add docs/data/${{ matrix.label }}_*.pdf || true
           if git diff --cached --quiet; then
             echo "Sem alteracoes para ${{ matrix.label }}"
             exit 0

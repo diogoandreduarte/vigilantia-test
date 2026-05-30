@@ -1,14 +1,17 @@
 """
 Acrescenta o resultado de um scan ao histórico JSON do site.
-Uso: python scripts/append_scan.py <label> <url> <date> <json_file> <docs_file>
+Uso: python scripts/append_scan.py <label> <url> <date> <json_file> <docs_file> [pdf_src]
 """
 import json
 import os
+import shutil
 import sys
 
 
 def main():
-    label, site_url, date, json_file, docs_file = sys.argv[1:6]
+    args = sys.argv[1:]
+    label, site_url, date, json_file, docs_file = args[:5]
+    pdf_src = args[5] if len(args) > 5 else None
 
     with open(json_file, encoding="utf-8") as f:
         result = json.load(f)
@@ -20,6 +23,14 @@ def main():
         "total":  result["summary"]["total"],
         "findings": result["findings"],
     }
+
+    # Copiar PDF para docs/data/ e registar no histórico
+    if pdf_src and os.path.exists(pdf_src):
+        pdf_dest_name = f"{label}_{date}.pdf"
+        pdf_dest = os.path.join(os.path.dirname(docs_file), pdf_dest_name)
+        shutil.copy2(pdf_src, pdf_dest)
+        scan_entry["pdf"] = pdf_dest_name
+        print(f"PDF guardado: {pdf_dest}")
 
     if os.path.exists(docs_file):
         with open(docs_file, encoding="utf-8") as f:
@@ -33,6 +44,22 @@ def main():
         json.dump(history, f, indent=2, ensure_ascii=False)
 
     print(f"Updated {docs_file}: {len(history['scans'])} scans total")
+
+    # Atualizar manifest.json automaticamente
+    manifest_file = os.path.join(os.path.dirname(docs_file), "manifest.json")
+    docs_filename = os.path.basename(docs_file)
+
+    if os.path.exists(manifest_file):
+        with open(manifest_file, encoding="utf-8") as f:
+            manifest = json.load(f)
+    else:
+        manifest = []
+
+    if docs_filename not in manifest:
+        manifest.append(docs_filename)
+        with open(manifest_file, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=2, ensure_ascii=False)
+        print(f"Added {docs_filename} to manifest.json")
 
 
 if __name__ == "__main__":

@@ -216,7 +216,14 @@
 
   <!-- ══ NÍVEL 3 — DETALHE DE UM SCAN ══ -->
   <div id="page-detail">
-    <button class="back-btn" id="detail-back-btn">&#8592; Histórico</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.8rem;">
+      <button class="back-btn" id="detail-back-btn" style="margin-bottom:0">&#8592; Histórico</button>
+      <a id="detail-pdf-link" href="#" download
+         style="display:none;align-items:center;gap:.4rem;background:var(--red-bg);border:1px solid var(--red-text);
+                color:var(--red-text);padding:.4rem .9rem;border-radius:4px;font-size:.83rem;text-decoration:none;">
+        &#8659; Descarregar PDF
+      </a>
+    </div>
     <div class="detail-header">
       <div>
         <div class="detail-title" id="detail-site-name"></div>
@@ -479,6 +486,15 @@
     $('detail-site-name').textContent = label;
     const link = $('detail-site-url');
     link.href = h.url; link.textContent = h.url;
+
+    // Link de download do PDF (se existir no histórico)
+    const pdfLink = $('detail-pdf-link');
+    if (scan.pdf) {
+      pdfLink.href = `data/${scan.pdf}`;
+      pdfLink.style.display = 'inline-flex';
+    } else {
+      pdfLink.style.display = 'none';
+    }
 
     $('detail-stats-row').innerHTML = `
       <div class="detail-stat">
