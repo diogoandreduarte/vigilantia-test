@@ -98,7 +98,7 @@ rules:
     severity: medium
     article: "Art. 17.º RGPD"
     recommendation: "Incluir secção sobre o direito ao apagamento e como os utilizadores o podem exercer."
-    keywords: ["apagamento", "esquecido", "erasure", "right to be forgotten"]
+    keywords: ["apagamento", "apagado", "eliminação", "eliminados", "esquecido", "erasure", "right to be forgotten", "direito ao apagamento"]
 
   - id: RGPD-12
     category: politica
@@ -133,7 +133,7 @@ rules:
     severity: medium
     article: "Art. 15.º RGPD"
     recommendation: "Incluir secção sobre o direito de acesso e como os utilizadores o podem exercer."
-    keywords: ["direito de acesso", "acesso aos dados", "right of access", "right to access", "aceder aos seus dados"]
+    keywords: ["direito de acesso", "direitos de acesso", "acesso aos dados", "right of access", "right to access", "aceder aos seus dados", "exercer os seus direitos"]
 
   - id: RGPD-16
     category: politica
@@ -151,7 +151,7 @@ rules:
     severity: low
     article: "Art. 13.º n.º 2 alínea a) RGPD"
     recommendation: "Indicar os prazos de conservação para cada tipo de dado ou os critérios usados para os determinar."
-    keywords: ["prazo de conservação", "período de conservação", "retention period", "conservados durante", "guardados por", "eliminados após", "deleted after"]
+    keywords: ["prazo de conservação", "período de conservação", "período máximo", "conservados pelo período", "retention period", "conservados durante", "conservados por", "guardados por", "eliminados após", "deleted after"]
 
   # ── FORMULÁRIOS (cont.) ────────────────────────────────────────────────────
 

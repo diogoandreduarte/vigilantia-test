@@ -36,11 +36,28 @@ _BANNER_TEXT_KEYWORDS = [
 
 def fetch_page_with_browser(url: str) -> dict:
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context()
+        browser = p.chromium.launch(
+            headless=True,
+            args=["--disable-blink-features=AutomationControlled"],
+        )
+        context = browser.new_context(
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/120.0.0.0 Safari/537.36"
+            )
+        )
         page = context.new_page()
+        # Esconder webdriver para evitar deteção de headless por sites
+        page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
         page.goto(url, wait_until="networkidle", timeout=30000)
+
+        # Scroll ao fundo para disparar IntersectionObservers (footers lazy)
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_timeout(1000)
+        page.evaluate("window.scrollTo(0, 0)")
+        page.wait_for_timeout(500)
 
         html = page.content()
         final_url = page.url

@@ -1,0 +1,67 @@
+Scripts Windows — Vigilantia
+=============================
+
+Todos os scripts devem ser executados a partir da raiz do projeto
+(a pasta que contem src/, rules/, docs/, etc.).
+
+Exemplo:
+  bat\scan.bat https://sapo.pt
+
+Na primeira execucao, o setup.bat e chamado automaticamente:
+  - cria o ambiente virtual Python 3.14 em .venv\
+  - instala todas as dependencias (pyproject.toml)
+  - instala o browser Playwright (Chromium)
+Nas execucoes seguintes apenas ativa o ambiente.
+
+--------------------------------------------------------------
+
+setup.bat
+  Configura o ambiente de desenvolvimento.
+  Chamado automaticamente pelos outros scripts.
+  Pode ser corrido manualmente para forcar reinstalacao das deps.
+
+  Uso: bat\setup.bat
+
+--------------------------------------------------------------
+
+scan.bat <URL> [opcoes]
+  Analisa um website e verifica conformidade RGPD.
+  Guarda automaticamente em docs\data\:
+    - historico JSON do site (<site>.json)
+    - relatorio HTML (<site>_<data>.html)
+    - relatorio PDF  (<site>_<data>.pdf)
+
+  Opcoes:
+    --quiet           Mostra apenas nao-conformidades
+    --no-history      Nao atualiza docs\data\ nem gera HTML/PDF
+
+  Exemplos:
+    bat\scan.bat https://sapo.pt
+    bat\scan.bat https://sapo.pt --quiet
+    bat\scan.bat https://sapo.pt --no-history
+
+--------------------------------------------------------------
+
+dashboard.bat
+  Inicia o servidor HTTP local e abre o dashboard no browser.
+  Dashboard disponivel em: http://localhost:8080
+  Para parar: Ctrl+C na janela do servidor.
+
+  Opcoes:
+    --port <numero>   Porta alternativa (default: 8080)
+    --no-browser      Nao abrir o browser automaticamente
+
+  Uso: bat\dashboard.bat
+
+--------------------------------------------------------------
+
+tests.bat [filtro]
+  Corre a suite de testes com pytest.
+  Aceita argumentos extras do pytest (ficheiros, flags, etc.).
+
+  Exemplos:
+    bat\tests.bat
+    bat\tests.bat tests/test_rule_engine.py
+    bat\tests.bat -k "test_consent"
+
+--------------------------------------------------------------

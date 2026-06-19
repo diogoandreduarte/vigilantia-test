@@ -222,11 +222,23 @@
   <div id="page-detail">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.8rem;">
       <button class="back-btn" id="detail-back-btn" style="margin-bottom:0">&#8592; Histórico</button>
-      <a id="detail-pdf-link" href="#" download
-         style="display:none;align-items:center;gap:.4rem;background:var(--red-bg);border:1px solid var(--red-text);
-                color:var(--red-text);padding:.4rem .9rem;border-radius:4px;font-size:.83rem;text-decoration:none;">
-        &#8659; Descarregar PDF
-      </a>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+        <a id="detail-html-link" href="#" download
+           style="display:none;align-items:center;gap:.4rem;background:var(--blue-bg);border:1px solid var(--blue-text);
+                  color:var(--blue-text);padding:.4rem .9rem;border-radius:4px;font-size:.83rem;text-decoration:none;">
+          &#8659; HTML
+        </a>
+        <a id="detail-pdf-link" href="#" download
+           style="display:none;align-items:center;gap:.4rem;background:var(--red-bg);border:1px solid var(--red-text);
+                  color:var(--red-text);padding:.4rem .9rem;border-radius:4px;font-size:.83rem;text-decoration:none;">
+          &#8659; PDF
+        </a>
+        <button id="detail-json-btn"
+           style="display:inline-flex;align-items:center;gap:.4rem;background:var(--green-bg);border:1px solid var(--green-text);
+                  color:var(--green-text);padding:.4rem .9rem;border-radius:4px;font-size:.83rem;cursor:pointer;">
+          &#8659; JSON
+        </button>
+      </div>
     </div>
     <div class="detail-header">
       <div>
@@ -491,7 +503,7 @@
     const link = $('detail-site-url');
     link.href = h.url; link.textContent = h.url;
 
-    // Link de download do PDF (se existir no histórico)
+    // Links de download
     const pdfLink = $('detail-pdf-link');
     if (scan.pdf) {
       pdfLink.href = `data/${scan.pdf}`;
@@ -499,6 +511,16 @@
     } else {
       pdfLink.style.display = 'none';
     }
+
+    const htmlLink = $('detail-html-link');
+    if (scan.html) {
+      htmlLink.href = `data/${scan.html}`;
+      htmlLink.style.display = 'inline-flex';
+    } else {
+      htmlLink.style.display = 'none';
+    }
+
+    $('detail-json-btn').onclick = () => downloadScanJSON(scan, h);
 
     $('detail-stats-row').innerHTML = `
       <div class="detail-stat">
@@ -615,6 +637,27 @@
     }
     // If href is still "#" the CSS rule .run-scan-btn[href="#"] hides the button
   })();
+
+  /* ── Download JSON ───────────────────────────────────────────────────── */
+  function downloadScanJSON(scan, history) {
+    const label = domainLabel(history.url);
+    const data = JSON.stringify({
+      site: history.site || label,
+      url: history.url,
+      date: scan.date,
+      summary: { passed: scan.passed, failed: scan.failed, total: scan.total },
+      findings: scan.findings
+    }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${label}_${scan.date}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
   /* ── Init ────────────────────────────────────────────────────────────── */
   (async () => {

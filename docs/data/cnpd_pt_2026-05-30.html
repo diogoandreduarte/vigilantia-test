@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório RGPD — Vigilantia</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; font-size: 14px; color: #222; margin: 2em; line-height: 1.5; }
+
+        /* PDF — WeasyPrint: A4 landscape para a tabela caber */
+        @page { size: A4 landscape; margin: 1.5cm; }
+        td, th { word-break: break-word; overflow-wrap: break-word; }
+        h1 { font-size: 1.6em; color: #2c3e50; margin-bottom: 0.2em; }
+        h2 { font-size: 1.2em; color: #2c3e50; margin: 1.4em 0 0.6em; border-bottom: 1px solid #ddd; padding-bottom: 0.3em; }
+        .meta { color: #666; font-size: 0.9em; margin-bottom: 1em; }
+
+        /* Resumo */
+        .summary { display: flex; gap: 1em; margin: 1em 0; flex-wrap: wrap; }
+        .badge { padding: 0.5em 1em; border-radius: 6px; font-weight: bold; font-size: 1em; }
+        .badge-high   { background: #fdecea; color: #c0392b; }
+        .badge-medium { background: #fef9e7; color: #d68910; }
+        .badge-low    { background: #eafaf1; color: #1e8449; }
+        .badge-ok     { background: #eaf4fb; color: #1a5276; }
+
+        /* Tabela */
+        table { border-collapse: collapse; width: 100%; margin-top: 0.5em; }
+        th, td { border: 1px solid #ddd; padding: 0.5em 0.7em; vertical-align: top; }
+        th { background: #f4f6f7; font-weight: bold; }
+        tr:nth-child(even) { background: #fafafa; }
+
+        .sev-high   { color: #c0392b; font-weight: bold; }
+        .sev-medium { color: #d68910; font-weight: bold; }
+        .sev-low    { color: #1e8449; font-weight: bold; }
+        .sev-info   { color: #555; }
+
+        .cat { display: inline-block; background: #eee; border-radius: 4px; padding: 0 6px; font-size: 0.85em; }
+
+        /* Passed */
+        .passed-table td { color: #555; }
+        .passed-table tr:nth-child(even) { background: #f9fbf9; }
+        .ok-mark { color: #1e8449; font-weight: bold; }
+
+        .disclaimer { margin-top: 2em; font-size: 0.85em; color: #999; border-top: 1px solid #eee; padding-top: 0.8em; }
+
+        /* Gráfico de barras */
+        .chart { margin: 1em 0; }
+        .bar-row { display: flex; align-items: center; gap: 0.6em; margin: 0.3em 0; font-size: 0.9em; }
+        .bar-label { width: 5em; text-align: right; color: #555; }
+        .bar-track { flex: 1; background: #f0f0f0; border-radius: 4px; height: 18px; }
+        .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+        .bar-high   { background: #e74c3c; }
+        .bar-medium { background: #f39c12; }
+        .bar-low    { background: #2ecc71; }
+        .bar-ok     { background: #3498db; }
+        .bar-count  { width: 2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Relatório de Conformidade RGPD</h1>
+    
+    <p class="meta">Site: <strong>https://www.cnpd.pt</strong> &nbsp;|&nbsp; Análise: 2026-05-30 16:21</p>
+    
+
+    <h2>Resumo</h2>
+    <div class="summary">
+        <span class="badge badge-high">🔴 Graves: 2</span>
+        <span class="badge badge-medium">🟡 Médios: 3</span>
+        <span class="badge badge-low">🟢 Baixos: 0</span>
+        <span class="badge badge-ok">✅ Conformes: 14</span>
+    </div>
+
+    
+    
+    <div class="chart">
+        
+        
+        <div class="bar-row">
+            <span class="bar-label">Graves</span>
+            <div class="bar-track">
+                <div class="bar-fill bar-high" style="width: 10.5%"></div>
+            </div>
+            <span class="bar-count">2</span>
+        </div>
+        
+        
+        
+        <div class="bar-row">
+            <span class="bar-label">Médios</span>
+            <div class="bar-track">
+                <div class="bar-fill bar-medium" style="width: 15.8%"></div>
+            </div>
+            <span class="bar-count">3</span>
+        </div>
+        
+        
+        
+        
+        
+        <div class="bar-row">
+            <span class="bar-label">Conformes</span>
+            <div class="bar-track">
+                <div class="bar-fill bar-ok" style="width: 73.7%"></div>
+            </div>
+            <span class="bar-count">14</span>
+        </div>
+        
+        
+    </div>
+    
+
+    
+    <h2>Não-Conformidades (5)</h2>
+    <table>
+        <tr>
+            <th>ID</th><th>Categoria</th><th>Gravidade</th><th>Título</th>
+            <th>Evidência</th><th>Recomendação</th><th>Artigo</th>
+        </tr>
+        
+        <tr>
+            <td>RGPD-01</td>
+            <td><span class="cat">consentimento</span></td>
+            <td class="sev-high">HIGH</td>
+            <td>Banner de consentimento ausente</td>
+            <td>consent_banner_detected = False</td>
+            <td>Implementar um CMP (Consent Management Platform) antes de carregar cookies não essenciais.</td>
+            <td>Art. 6.º RGPD / ePrivacy Directive</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-07</td>
+            <td><span class="cat">formularios</span></td>
+            <td class="sev-medium">MEDIUM</td>
+            <td>Formulário sem aviso de privacidade</td>
+            <td>1 formulário(s) sem aviso de privacidade</td>
+            <td>Adicionar texto junto a cada formulário explicando finalidade, responsável e direitos.</td>
+            <td>Art. 13.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-10</td>
+            <td><span class="cat">politica</span></td>
+            <td class="sev-medium">MEDIUM</td>
+            <td>Política não menciona consentimento</td>
+            <td>Termos ausentes na política: ['consentimento', 'responsável pelo tratamento', 'transferências internacionais']</td>
+            <td>Incluir secção sobre como e quando é obtido consentimento dos utilizadores.</td>
+            <td>Art. 7.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-12</td>
+            <td><span class="cat">politica</span></td>
+            <td class="sev-high">HIGH</td>
+            <td>Política não identifica o responsável pelo tratamento</td>
+            <td>Termos ausentes na política: ['consentimento', 'responsável pelo tratamento', 'transferências internacionais']</td>
+            <td>Identificar claramente o responsável pelo tratamento (nome, morada, contacto).</td>
+            <td>Art. 13.º n.º 1 RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-16</td>
+            <td><span class="cat">politica</span></td>
+            <td class="sev-medium">MEDIUM</td>
+            <td>Política não menciona transferências internacionais de dados</td>
+            <td>Termos ausentes na política: ['consentimento', 'responsável pelo tratamento', 'transferências internacionais']</td>
+            <td>Indicar se existem transferências internacionais, para que países e com que garantias.</td>
+            <td>Art. 44.º a 49.º RGPD</td>
+        </tr>
+        
+    </table>
+    
+
+    
+    <h2>Regras Cumpridas (14)</h2>
+    <table class="passed-table">
+        <tr><th>ID</th><th>Categoria</th><th>Título</th><th>Artigo</th></tr>
+        
+        <tr>
+            <td>RGPD-02</td>
+            <td><span class="cat">cookies</span></td>
+            <td><span class="ok-mark">✅</span> Cookies de terceiros sem consentimento</td>
+            <td>Art. 6.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-03</td>
+            <td><span class="cat">cookies</span></td>
+            <td><span class="ok-mark">✅</span> Cookie de tracking sem flag Secure</td>
+            <td>Art. 32.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-04</td>
+            <td><span class="cat">cookies</span></td>
+            <td><span class="ok-mark">✅</span> Cookie de sessão sem flag HttpOnly</td>
+            <td>Art. 32.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-05</td>
+            <td><span class="cat">terceiros</span></td>
+            <td><span class="ok-mark">✅</span> Script de analytics sem consentimento</td>
+            <td>Art. 6.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-06</td>
+            <td><span class="cat">terceiros</span></td>
+            <td><span class="ok-mark">✅</span> Script de publicidade sem consentimento</td>
+            <td>Art. 6.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-08</td>
+            <td><span class="cat">formularios</span></td>
+            <td><span class="ok-mark">✅</span> Formulário de dados pessoais com método GET</td>
+            <td>Art. 32.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-09</td>
+            <td><span class="cat">politica</span></td>
+            <td><span class="ok-mark">✅</span> Política de privacidade ausente</td>
+            <td>Art. 13.º e 14.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-11</td>
+            <td><span class="cat">politica</span></td>
+            <td><span class="ok-mark">✅</span> Política não menciona direito ao apagamento</td>
+            <td>Art. 17.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-13</td>
+            <td><span class="cat">politica</span></td>
+            <td><span class="ok-mark">✅</span> Política não menciona contacto do DPO</td>
+            <td>Art. 13.º n.º 1 alínea b) RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-14</td>
+            <td><span class="cat">politica</span></td>
+            <td><span class="ok-mark">✅</span> Idioma da política não corresponde ao idioma do site</td>
+            <td>Art. 12.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-15</td>
+            <td><span class="cat">politica</span></td>
+            <td><span class="ok-mark">✅</span> Política não menciona direito de acesso aos dados</td>
+            <td>Art. 15.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-17</td>
+            <td><span class="cat">politica</span></td>
+            <td><span class="ok-mark">✅</span> Política não indica prazo de conservação dos dados</td>
+            <td>Art. 13.º n.º 2 alínea a) RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-18</td>
+            <td><span class="cat">formularios</span></td>
+            <td><span class="ok-mark">✅</span> Campo de password sem autocomplete adequado</td>
+            <td>Art. 32.º RGPD</td>
+        </tr>
+        
+        <tr>
+            <td>RGPD-19</td>
+            <td><span class="cat">terceiros</span></td>
+            <td><span class="ok-mark">✅</span> Google Analytics (Universal) sem anonimização de IP</td>
+            <td>Art. 5.º n.º 1 alínea c) RGPD</td>
+        </tr>
+        
+    </table>
+    
+
+    <div class="disclaimer"><strong>Aviso Legal:</strong> Este relatório é gerado automaticamente e não substitui uma auditoria jurídica profissional.</div>
+</body>
+</html>

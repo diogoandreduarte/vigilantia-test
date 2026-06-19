@@ -69,27 +69,55 @@ def extract_forms(html: str) -> list[dict]:
 def find_privacy_policy_link(html: str) -> str | None:
     soup = BeautifulSoup(html, "html.parser")
 
-    priority_keywords = [
-        "privacy policy", "política de privacidade",
-        "politica de privacidade", "privacy", "privacidade",
+    # Texto exato do link (score mais alto)
+    exact_text = [
+        "política de privacidade", "politica de privacidade",
+        "privacy policy", "aviso de privacidade",
+        "declaração de privacidade", "declaracao de privacidade",
+        "aviso legal e privacidade",
     ]
-    secondary_keywords = [
-        "cookies", "termos", "terms",
-        "proteção de dados", "protecao de dados",
+    # href contém estes padrões (score alto)
+    href_patterns = [
+        "politica-de-privacidade", "politica_de_privacidade",
+        "privacy-policy", "privacypolicy", "privacy_policy",
+        "aviso-privacidade", "aviso-legal",
     ]
+    # Fallback: qualquer link com menção genérica
+    fallback_text = ["privacidade", "privacy"]
+    fallback_href = ["privacidade", "privacy", "cookies", "protecao-de-dados", "rgpd", "gdpr"]
+    fallback_text_secondary = ["cookies", "termos", "terms", "proteção de dados", "protecao de dados"]
 
-    candidates = []
+    # 1. Texto do link corresponde exatamente
     for a in soup.find_all("a", href=True):
-        link_text = a.get_text(strip=True).lower()
-        href = a["href"].lower()
-        for kw in priority_keywords:
-            if kw in link_text or kw in href:
-                return a["href"]
-        for kw in secondary_keywords:
-            if kw in link_text or kw in href:
-                candidates.append(a["href"])
+        if a.get_text(strip=True).lower() in exact_text:
+            return a["href"]
 
-    return candidates[0] if candidates else None
+    # 2. Texto contém frase específica
+    for a in soup.find_all("a", href=True):
+        text = a.get_text(strip=True).lower()
+        if any(kw in text for kw in exact_text):
+            return a["href"]
+
+    # 3. href contém padrão específico
+    for a in soup.find_all("a", href=True):
+        href = a["href"].lower()
+        if any(p in href for p in href_patterns):
+            return a["href"]
+
+    # 4. Texto ou href com menção genérica a privacidade
+    for a in soup.find_all("a", href=True):
+        text = a.get_text(strip=True).lower()
+        href = a["href"].lower()
+        if any(kw in text for kw in fallback_text) or any(kw in href for kw in fallback_href):
+            return a["href"]
+
+    # 5. Último recurso: cookies/termos
+    for a in soup.find_all("a", href=True):
+        text = a.get_text(strip=True).lower()
+        if any(kw in text for kw in fallback_text_secondary):
+            return a["href"]
+
+    return None
 
 
 def extract_page_language(html: str) -> str:

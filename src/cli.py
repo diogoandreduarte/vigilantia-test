@@ -31,8 +31,8 @@ def _history_path(url: str) -> Optional[Path]:
         return None
 
 
-def _append_to_history(url: str, result_json_path: str, pdf_path: Optional[str] = None) -> Optional[Path]:
-    """Appenda o resultado ao histórico do dashboard. Gera e guarda o PDF se docs/data/ existir."""
+def _append_to_history(url: str, result_json_path: str, pdf_path: Optional[str] = None, html_path: Optional[str] = None) -> Optional[Path]:
+    """Appenda o resultado ao histórico do dashboard."""
     hist_path = _history_path(url)
     if not hist_path:
         return None
@@ -42,8 +42,9 @@ def _append_to_history(url: str, result_json_path: str, pdf_path: Optional[str] 
         label = hist_path.stem
         today = date.today().isoformat()
         cmd = [sys.executable, str(script), label, url, today, result_json_path, str(hist_path)]
-        if pdf_path:
-            cmd.append(pdf_path)
+        cmd.append(pdf_path or "")
+        if html_path:
+            cmd.append(html_path)
         subprocess.run(cmd, check=True, capture_output=True)
         return hist_path
     except Exception:
@@ -133,23 +134,30 @@ def analyze(
 
         # 7. Histórico do dashboard (automático se docs/data/ existir)
         if not no_history:
-            # Gerar PDF temporário para guardar no histórico
             pdf_for_history: Optional[str] = None
+            html_for_history: Optional[str] = None
             hist_path = _history_path(url)
             if hist_path:
+                from datetime import date
+                today_str = date.today().isoformat()
                 try:
-                    from datetime import date
-                    pdf_name = f"{hist_path.stem}_{date.today().isoformat()}.pdf"
-                    pdf_for_history = str(hist_path.parent / pdf_name)
+                    pdf_for_history = str(hist_path.parent / f"{hist_path.stem}_{today_str}.pdf")
                     generate_pdf_report(findings, pdf_for_history, site_data=site_data)
                 except Exception:
                     pdf_for_history = None
+                try:
+                    html_for_history = str(hist_path.parent / f"{hist_path.stem}_{today_str}.html")
+                    generate_html_report(findings, html_for_history, site_data=site_data)
+                except Exception:
+                    html_for_history = None
 
-            hist = _append_to_history(url, tmp_path, pdf_path=pdf_for_history)
+            hist = _append_to_history(url, tmp_path, pdf_path=pdf_for_history, html_path=html_for_history)
             if hist:
                 typer.echo(f"Historico atualizado: {hist}")
                 if pdf_for_history and os.path.exists(pdf_for_history):
                     typer.echo(f"PDF guardado: {pdf_for_history}")
+                if html_for_history and os.path.exists(html_for_history):
+                    typer.echo(f"HTML guardado: {html_for_history}")
     finally:
         os.remove(tmp_path)
 
@@ -171,10 +179,14 @@ def serve(
 
     os.chdir(docs_dir)
 
-    handler = http.server.SimpleHTTPRequestHandler
-    handler.log_message = lambda *a: None  # silencia logs do servidor
+    class _Handler(http.server.SimpleHTTPRequestHandler):
+        def end_headers(self):
+            self.send_header("Connection", "close")
+            super().end_headers()
+        def log_message(self, *args):
+            pass
 
-    with http.server.HTTPServer(("", port), handler) as httpd:
+    with http.server.ThreadingHTTPServer(("", port), _Handler) as httpd:
         url = f"http://localhost:{port}"
         typer.echo(f"Dashboard disponível em: {url}")
         typer.echo("Ctrl+C para parar.")

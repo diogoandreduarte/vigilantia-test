@@ -1,0 +1,225 @@
+{
+  "site": "cnil_fr",
+  "url": "https://cnil.fr",
+  "scans": [
+    {
+      "date": "2026-05-30",
+      "passed": 7,
+      "failed": 12,
+      "total": 19,
+      "findings": [
+        {
+          "rule_id": "RGPD-01",
+          "category": "consentimento",
+          "severity": "high",
+          "title": "Banner de consentimento ausente",
+          "description": "O site não apresenta banner de consentimento de cookies.",
+          "evidence": "consent_banner_detected = False",
+          "recommendation": "Implementar um CMP (Consent Management Platform) antes de carregar cookies não essenciais.",
+          "article": "Art. 6.º RGPD / ePrivacy Directive",
+          "passed": false
+        },
+        {
+          "rule_id": "RGPD-02",
+          "category": "cookies",
+          "severity": "high",
+          "title": "Cookies de terceiros sem consentimento",
+          "description": "Existem cookies de domínios terceiros, o que requer consentimento explícito.",
+          "evidence": null,
+          "recommendation": "Bloquear cookies de terceiros até o utilizador dar consentimento via CMP.",
+          "article": "Art. 6.º RGPD",
+          "passed": true
+        },
+        {
+          "rule_id": "RGPD-03",
+          "category": "cookies",
+          "severity": "medium",
+          "title": "Cookie de tracking sem flag Secure",
+          "description": "Cookies de rastreio não têm a flag Secure ativa, podendo viajar por HTTP.",
+          "evidence": "Cookies sem Secure: ['SERVERID', 'espace']",
+          "recommendation": "Definir Secure=True em todos os cookies de tracking.",
+          "article": "Art. 32.º RGPD",
+          "passed": false
+        },
+        {
+          "rule_id": "RGPD-04",
+          "category": "cookies",
+          "severity": "medium",
+          "title": "Cookie de sessão sem flag HttpOnly",
+          "description": "Cookies de sessão sem HttpOnly ficam expostos a ataques XSS.",
+          "evidence": "Cookies sem HttpOnly: ['SERVERID', 'espace', 'tarteaucitron']",
+          "recommendation": "Definir HttpOnly=True em todos os cookies de sessão.",
+          "article": "Art. 32.º RGPD",
+          "passed": false
+        },
+        {
+          "rule_id": "RGPD-05",
+          "category": "terceiros",
+          "severity": "high",
+          "title": "Script de analytics sem consentimento",
+          "description": "Scripts de analytics (ex: Google Analytics) carregam sem consentimento prévio.",
+          "evidence": "Scripts de analytics sem consentimento: ['https://piwik.cnil.fr/matomo.js', '/themes/custom/bootstrap_cnil/js/matomo.js?tf8a90', '/modules/contrib/matomo/js/matomo.js?v=10.5.6']",
+          "recommendation": "Carregar scripts de analytics apenas após consentimento explícito do utilizador.",
+          "article": "Art. 6.º RGPD",
+          "passed": false
+        },
+        {
+          "rule_id": "RGPD-06",
+          "category": "terceiros",
+          "severity": "high",
+          "title": "Script de publicidade sem consentimento",
+          "description": "Scripts de publicidade carregam sem consentimento prévio explícito.",
+          "evidence": null,
+          "recommendation": "Bloquear scripts de advertising até obter consentimento via CMP.",
+          "article": "Art. 6.º RGPD",
+          "passed": true
+        },
+        {
+          "rule_id": "RGPD-07",
+          "category": "formularios",
+          "severity": "medium",
+          "title": "Formulário sem aviso de privacidade",
+          "description": "Formulários que recolhem dados pessoais não têm aviso de tratamento junto.",
+          "evidence": "1 formulário(s) sem aviso de privacidade",
+          "recommendation": "Adicionar texto junto a cada formulário explicando finalidade, responsável e direitos.",
+          "article": "Art. 13.º RGPD",
+          "passed": false
+        },
+        {
+          "rule_id": "RGPD-08",
+          "category": "formularios",
+          "severity": "medium",
+          "title": "Formulário de dados pessoais com método GET",
+          "description": "Formulários de contacto/login usam GET, expondo dados na URL.",
+          "evidence": null,
+          "recommendation": "Alterar o método dos formulários de dados pessoais para POST.",
+          "article": "Art. 32.º RGPD",
+          "passed": true
+        },
+        {
+          "rule_id": "RGPD-09",
+          "category": "politica",
+          "severity": "high",
+          "title": "Política de privacidade ausente",
+          "description": "Não foi encontrado link para política de privacidade na página.",
+          "evidence": null,
+          "recommendation": "Publicar política de privacidade e linkar no rodapé de todas as páginas.",
+          "article": "Art. 13.º e 14.º RGPD",
+          "passed": true
+        },
+        {
+          "rule_id": "RGPD-10",
+          "category": "politica",
+          "severity": "medium",
+          "title": "Política não menciona consentimento",
+          "description": "O texto da política de privacidade não menciona a palavra 'consentimento'.",
+          "evidence": "Termos ausentes na política: ['consentimento', 'direito ao apagamento', 'responsável pelo tratamento', 'DPO / encarregado de proteção', 'direito de acesso', 'transferências internacionais', 'prazo de conservação']",
+          "recommendation": "Incluir secção sobre como e quando é obtido consentimento dos utilizadores.",
+          "article": "Art. 7.º RGPD",
+          "passed": false
+        },
+        {
+          "rule_id": "RGPD-11",
+          "category": "politica",
+          "severity": "medium",
+          "title": "Política não menciona direito ao apagamento",
+          "description": "A política não menciona o direito ao apagamento ('direito a ser esquecido').",
+          "evidence": "Termos ausentes na política: ['consentimento', 'direito ao apagamento', 'responsável pelo tratamento', 'DPO / encarregado de proteção', 'direito de acesso', 'transferências internacionais', 'prazo de conservação']",
+          "recommendation": "Incluir secção sobre o direito ao apagamento e como os utilizadores o podem exercer.",
+          "article": "Art. 17.º RGPD",
+          "passed": false
+        },
+        {
+          "rule_id": "RGPD-12",
+          "category": "politica",
+          "severity": "high",
+          "title": "Política não identifica o responsável pelo tratamento",
+          "description": "A política não menciona quem é o responsável pelo tratamento de dados.",
+          "evidence": "Termos ausentes na política: ['consentimento', 'direito ao apagamento', 'responsável pelo tratamento', 'DPO / encarregado de proteção', 'direito de acesso', 'transferências internacionais', 'prazo de conservação']",
+          "recommendation": "Identificar claramente o responsável pelo tratamento (nome, morada, contacto).",
+          "article": "Art. 13.º n.º 1 RGPD",
+          "passed": false
+        },
+        {
+          "rule_id": "RGPD-13",
+          "category": "politica",
+          "severity": "low",
+          "title": "Política não menciona contacto do DPO",
+          "description": "A política não inclui dados de contacto do Encarregado de Proteção de Dados (DPO).",
+          "evidence": "Termos ausentes na política: ['consentimento', 'direito ao apagamento', 'responsável pelo tratamento', 'DPO / encarregado de proteção', 'direito de acesso', 'transferências internacionais', 'prazo de conservação']",
+          "recommendation": "Incluir email ou formulário de contacto do DPO na política de privacidade.",
+          "article": "Art. 13.º n.º 1 alínea b) RGPD",
+          "passed": false
+        },
+        {
+          "rule_id": "RGPD-14",
+          "category": "politica",
+          "severity": "medium",
+          "title": "Idioma da política não corresponde ao idioma do site",
+          "description": "A política de privacidade está num idioma diferente do idioma principal do site.",
+          "evidence": null,
+          "recommendation": "Traduzir a política de privacidade para o idioma principal do site.",
+          "article": "Art. 12.º RGPD",
+          "passed": true
+        },
+        {
+          "rule_id": "RGPD-15",
+          "category": "politica",
+          "severity": "medium",
+          "title": "Política não menciona direito de acesso aos dados",
+          "description": "A política não informa o utilizador sobre o seu direito de acesso aos dados pessoais.",
+          "evidence": "Termos ausentes na política: ['consentimento', 'direito ao apagamento', 'responsável pelo tratamento', 'DPO / encarregado de proteção', 'direito de acesso', 'transferências internacionais', 'prazo de conservação']",
+          "recommendation": "Incluir secção sobre o direito de acesso e como os utilizadores o podem exercer.",
+          "article": "Art. 15.º RGPD",
+          "passed": false
+        },
+        {
+          "rule_id": "RGPD-16",
+          "category": "politica",
+          "severity": "medium",
+          "title": "Política não menciona transferências internacionais de dados",
+          "description": "A política não informa sobre possíveis transferências de dados para fora da UE.",
+          "evidence": "Termos ausentes na política: ['consentimento', 'direito ao apagamento', 'responsável pelo tratamento', 'DPO / encarregado de proteção', 'direito de acesso', 'transferências internacionais', 'prazo de conservação']",
+          "recommendation": "Indicar se existem transferências internacionais, para que países e com que garantias.",
+          "article": "Art. 44.º a 49.º RGPD",
+          "passed": false
+        },
+        {
+          "rule_id": "RGPD-17",
+          "category": "politica",
+          "severity": "low",
+          "title": "Política não indica prazo de conservação dos dados",
+          "description": "A política não especifica durante quanto tempo os dados pessoais são conservados.",
+          "evidence": "Termos ausentes na política: ['consentimento', 'direito ao apagamento', 'responsável pelo tratamento', 'DPO / encarregado de proteção', 'direito de acesso', 'transferências internacionais', 'prazo de conservação']",
+          "recommendation": "Indicar os prazos de conservação para cada tipo de dado ou os critérios usados para os determinar.",
+          "article": "Art. 13.º n.º 2 alínea a) RGPD",
+          "passed": false
+        },
+        {
+          "rule_id": "RGPD-18",
+          "category": "formularios",
+          "severity": "low",
+          "title": "Campo de password sem autocomplete adequado",
+          "description": "Campos de password não têm o atributo autocomplete='new-password' ou 'current-password'.",
+          "evidence": null,
+          "recommendation": "Adicionar autocomplete='new-password' em campos de registo e 'current-password' em campos de login.",
+          "article": "Art. 32.º RGPD",
+          "passed": true
+        },
+        {
+          "rule_id": "RGPD-19",
+          "category": "terceiros",
+          "severity": "medium",
+          "title": "Google Analytics (Universal) sem anonimização de IP",
+          "description": "O site usa Universal Analytics (analytics.js) que requer configuração explícita de anonimização de IP.",
+          "evidence": null,
+          "recommendation": "Ativar anonymize_ip: true na configuração do Google Analytics, ou migrar para GA4 que anonimiza por defeito.",
+          "article": "Art. 5.º n.º 1 alínea c) RGPD",
+          "passed": true
+        }
+      ],
+      "pdf": "cnil_fr_2026-05-30.pdf",
+      "html": "cnil_fr_2026-05-30.html"
+    }
+  ]
+}

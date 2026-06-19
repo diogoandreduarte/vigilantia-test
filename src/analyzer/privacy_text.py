@@ -24,12 +24,12 @@ class PolicyFeatures:
 
 _KEYWORD_MAP = {
     "consent": ["consentimento", "consent", "autorização", "autorizo"],
-    "erasure": ["apagamento", "esquecido", "erasure", "right to be forgotten", "direito ao apagamento"],
+    "erasure": ["apagamento", "apagado", "eliminação", "eliminados", "esquecido", "erasure", "right to be forgotten", "direito ao apagamento"],
     "controller": ["responsável pelo tratamento", "data controller", "responsável", "controller", "entidade responsável"],
     "dpo": ["dpo", "encarregado de proteção", "encarregado de dados", "data protection officer", "encarregado"],
-    "access": ["direito de acesso", "acesso aos dados", "right of access", "right to access", "aceder aos seus dados"],
+    "access": ["direito de acesso", "direitos de acesso", "acesso aos dados", "right of access", "right to access", "aceder aos seus dados", "exercer os seus direitos"],
     "international": ["transferências internacionais", "international transfers", "terceiros países", "third countries", "fora da união europeia", "outside the eu"],
-    "retention": ["prazo de conservação", "período de conservação", "retention period", "conservados durante", "guardados por", "eliminados após", "deleted after"],
+    "retention": ["prazo de conservação", "período de conservação", "período máximo", "conservados pelo período", "retention period", "conservados durante", "conservados por", "guardados por", "eliminados após", "deleted after"],
 }
 
 _DPO_CONTACT_PATTERN = re.compile(

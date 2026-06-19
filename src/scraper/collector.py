@@ -55,6 +55,21 @@ def _detect_language(html: str, page_text: str) -> str:
         return "unknown"
 
 
+def _fetch_privacy_policy_text(policy_url: str, base_url: str) -> str | None:
+    try:
+        import requests
+        from urllib.parse import urljoin
+        from bs4 import BeautifulSoup
+        full_url = urljoin(base_url, policy_url)
+        r = requests.get(full_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
+        if r.ok:
+            soup = BeautifulSoup(r.text, "html.parser")
+            return soup.get_text(separator=" ", strip=True)
+    except Exception:
+        pass
+    return None
+
+
 def collect_site_data(url: str) -> SiteData:
     page_data = fetch_page_with_browser(url)
     html = page_data["html"]
@@ -96,6 +111,9 @@ def collect_site_data(url: str) -> SiteData:
         page_text = ""
     language = _detect_language(html, page_text)
 
+    privacy_url = find_privacy_policy_link(html)
+    privacy_text = _fetch_privacy_policy_text(privacy_url, page_data["final_url"]) if privacy_url else None
+
     return SiteData(
         url=url,
         final_url=page_data["final_url"],
@@ -103,8 +121,8 @@ def collect_site_data(url: str) -> SiteData:
         cookies=cookies,
         third_party_scripts=scripts,
         forms=forms,
-        privacy_policy_url=find_privacy_policy_link(html),
-        privacy_policy_text=None,
+        privacy_policy_url=privacy_url,
+        privacy_policy_text=privacy_text,
         consent_banner_detected=page_data["consent_banner_detected"],
         screenshot_path=None,
     )

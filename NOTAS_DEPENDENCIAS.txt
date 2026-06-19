@@ -4,7 +4,19 @@ Comandos e notas adicionais para garantir o correto funcionamento do projeto.
 
 ---
 
-## Ambiente Virtual
+## Setup Rápido (Recomendado)
+
+Corre o script de setup — trata de tudo automaticamente:
+```
+bat\setup.bat
+```
+
+O script cria o `.venv`, instala todas as dependências via `pyproject.toml` e instala o Playwright Chromium.
+Só é necessário fazer setup completo na primeira execução.
+
+---
+
+## Ambiente Virtual (Manual)
 
 Criar e ativar (Python 3.14):
 ```
@@ -17,31 +29,25 @@ Se der erro de política de execução no PowerShell:
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-
 ---
 
-## Instalação de Dependências
+## Instalação de Dependências (Manual)
 
-Instalar tudo de uma vez:
+Instalar a partir do `pyproject.toml` (fonte de verdade):
 ```
-pip install -r requirements.txt
+pip install -e .
+pip install pytest
 ```
 
-Ou instalar manualmente os pacotes principais:
-```
-pip install requests beautifulsoup4 playwright pydantic typer pyyaml jinja2 weasyprint langdetect
-```
+> Nota: o `requirements.txt` apenas lista dependências de desenvolvimento adicionais.
+> Usar sempre `pip install -e .` para instalar o projeto e as suas dependências.
 
 ---
 
 ## Passos Adicionais Após Instalação
 
 ### Playwright (browsers)
-Após instalar o pacote, é obrigatório instalar os browsers:
-```
-python -m playwright install
-```
-Ou apenas o Chromium (mais leve):
+Após instalar o pacote, é obrigatório instalar o browser:
 ```
 python -m playwright install chromium
 ```
@@ -56,10 +62,9 @@ https://weasyprint.readthedocs.io/en/latest/install.html
 ## Atualização de Dependências
 
 Sempre que instalar um pacote novo:
-1. Adicionar ao `pyproject.toml` (secção `dependencies`)
-2. Atualizar `requirements.txt` com `pip freeze > requirements.txt`
-3. Registar aqui se precisar de passos manuais adicionais
+1. Adicionar ao `pyproject.toml` (secção `dependencies`) — é a fonte de verdade
+2. Registar aqui se precisar de passos manuais adicionais
 
 ---
 
-Última atualização: 2026-05-29
+Última atualização: 2026-05-30
