@@ -143,7 +143,8 @@ def analyze(
                 try:
                     pdf_for_history = str(hist_path.parent / f"{hist_path.stem}_{today_str}.pdf")
                     generate_pdf_report(findings, pdf_for_history, site_data=site_data)
-                except Exception:
+                except Exception as e:
+                    typer.echo(f"[AVISO] PDF do historico falhou: {e}", err=True)
                     pdf_for_history = None
                 try:
                     html_for_history = str(hist_path.parent / f"{hist_path.stem}_{today_str}.html")
@@ -182,6 +183,9 @@ def serve(
     class _Handler(http.server.SimpleHTTPRequestHandler):
         def end_headers(self):
             self.send_header("Connection", "close")
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
             super().end_headers()
         def log_message(self, *args):
             pass

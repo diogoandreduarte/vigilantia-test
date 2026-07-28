@@ -154,6 +154,7 @@
     Vigilantia
   </span>
   <span class="header-meta" id="header-meta">Dashboard RGPD</span>
+  <button class="run-scan-btn" id="reload-btn" style="background:var(--surface2);border-color:var(--border);color:var(--text-dim);margin-right:.5rem;cursor:pointer;">&#8635; Atualizar</button>
   <a class="run-scan-btn" id="run-scan-btn" href="#" target="_blank" rel="noopener">&#9654; Run Scan</a>
 </header>
 
@@ -322,15 +323,17 @@
   }
 
   /* ── Data loading ────────────────────────────────────────────────────── */
+  const NO_CACHE = { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } };
+
   async function loadAllData() {
     let files;
     try {
-      const r = await fetch(MANIFEST_URL);
+      const r = await fetch(`${MANIFEST_URL}?t=${Date.now()}`, NO_CACHE);
       files = r.ok ? await r.json() : SITES_FALLBACK;
     } catch { files = SITES_FALLBACK; }
 
     const results = await Promise.allSettled(files.map(async f => {
-      const r = await fetch(`data/${f}`);
+      const r = await fetch(`data/${f}?t=${Date.now()}`, NO_CACHE);
       if (!r.ok) throw new Error(`Cannot load ${f}`);
       const raw = await r.json();
       // Support both new history format and legacy flat format
@@ -659,16 +662,29 @@
     URL.revokeObjectURL(url);
   }
 
-  /* ── Init ────────────────────────────────────────────────────────────── */
-  (async () => {
+  /* ── Init / Reload ───────────────────────────────────────────────────── */
+  async function refreshDashboard() {
     try {
       await loadAllData();
       updateGlobalStats();
       renderSummary();
+      showSummary();
     } catch (err) {
       $('summary-body').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--red-text)">Erro ao carregar dados: ${err.message}</td></tr>`;
     }
-  })();
+  }
+
+  $('reload-btn').addEventListener('click', async () => {
+    const btn = $('reload-btn');
+    btn.disabled = true;
+    const original = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner" style="width:12px;height:12px;"></span> A atualizar…';
+    await refreshDashboard();
+    btn.innerHTML = original;
+    btn.disabled = false;
+  });
+
+  refreshDashboard();
 </script>
 </body>
 </html>

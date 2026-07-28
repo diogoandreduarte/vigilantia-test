@@ -51,7 +51,15 @@ def fetch_page_with_browser(url: str) -> dict:
         # Esconder webdriver para evitar deteção de headless por sites
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
-        page.goto(url, wait_until="networkidle", timeout=30000)
+        # "domcontentloaded" é suficiente para termos o HTML e disparar scripts;
+        # "networkidle" falha em muitos sites reais (trackers, chats, heartbeats
+        # de analytics nunca deixam a rede ficar verdadeiramente parada), pelo
+        # que é usado apenas como espera "best effort" depois, sem rebentar o scan.
+        page.goto(url, wait_until="domcontentloaded", timeout=30000)
+        try:
+            page.wait_for_load_state("networkidle", timeout=10000)
+        except Exception:
+            pass
 
         # Scroll ao fundo para disparar IntersectionObservers (footers lazy)
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
